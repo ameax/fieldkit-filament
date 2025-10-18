@@ -1,60 +1,131 @@
-# This is my package fieldkit-filament
+# FieldKit Filament
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/ameax/fieldkit-filament.svg?style=flat-square)](https://packagist.org/packages/ameax/fieldkit-filament)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/ameax/fieldkit-filament/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/ameax/fieldkit-filament/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/ameax/fieldkit-filament/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/ameax/fieldkit-filament/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/ameax/fieldkit-filament.svg?style=flat-square)](https://packagist.org/packages/ameax/fieldkit-filament)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+Filament admin panel integration for FieldKit - provides GUI for managing dynamic form fields and renders Filament form components.
 
-## Support us
+## Features
 
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/fieldkit-filament.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/fieldkit-filament)
+- **Admin GUI** - Manage form fields through Filament interface
+- **Form Adapter** - Converts FieldKit definitions to Filament components
+- **Resource Management** - CRUD interface for forms, fields, options, and mappings
+- **Visual Field Builder** - Create and edit fields with live preview
+- **Mapping Configuration** - Configure external system mappings through GUI
+- **Auto-Component Generation** - Automatically renders appropriate Filament components
 
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
+## Requirements
 
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+- PHP 8.3+
+- Laravel 11.0 or 12.0
+- Filament 3.x
+- [ameax/fieldkit-core](https://github.com/ameax/fieldkit-core)
 
 ## Installation
 
-You can install the package via composer:
-
 ```bash
+composer require ameax/fieldkit-core
 composer require ameax/fieldkit-filament
 ```
 
-You can publish and run the migrations with:
+Publish and run migrations:
 
 ```bash
+php artisan vendor:publish --tag="fieldkit-core-migrations"
 php artisan vendor:publish --tag="fieldkit-filament-migrations"
 php artisan migrate
 ```
 
-You can publish the config file with:
+Publish config (optional):
 
 ```bash
+php artisan vendor:publish --tag="fieldkit-core-config"
 php artisan vendor:publish --tag="fieldkit-filament-config"
 ```
 
-This is the contents of the published config file:
+## Basic Usage
+
+### 1. Access Admin Panel
+
+Navigate to `/admin/fieldkit-forms` to manage your dynamic fields.
+
+### 2. Create a Form
+
+1. Click "New Form"
+2. Set purpose token (e.g., `customer_registration`)
+3. Add fields (text, email, select, etc.)
+4. Configure mappings for external systems
+5. Save
+
+### 3. Use in Livewire Components
 
 ```php
-return [
-];
+use Ameax\FieldkitCore\Services\FieldKitService;
+use Ameax\FieldkitFilament\Adapters\FieldKitFilamentAdapter;
+
+class AccountRegistration extends Component
+{
+    public array $data = [];
+
+    protected function customerSchema(): array
+    {
+        $service = app(FieldKitService::class);
+        $adapter = app(FieldKitFilamentAdapter::class);
+
+        return array_merge(
+            $this->baseFields(),
+            $service->renderFormComponents(
+                purposeToken: 'customer_registration',
+                adapter: $adapter
+            )
+        );
+    }
+}
 ```
 
-Optionally, you can publish the views using
+### 4. Render in Blade
 
-```bash
-php artisan vendor:publish --tag="fieldkit-filament-views"
+```blade
+<form wire:submit="register">
+    {{ $this->form }}
+
+    <button type="submit">Register</button>
+</form>
 ```
 
-## Usage
+## Supported Field Types
 
-```php
-$fieldkitFilament = new Ameax\FieldkitFilament();
-echo $fieldkitFilament->echoPhrase('Hello, Ameax!');
-```
+- Text Input
+- Email Input
+- Number Input
+- Textarea
+- Checkbox
+- Select (with options)
+- Radio (with descriptions)
+
+## External System Mappings
+
+Configure mappings through the admin panel:
+
+1. Edit a field
+2. Go to "Mappings" tab
+3. Add mapping:
+   - Adapter: `ameax_column` (or custom)
+   - Target Table: `customer`
+   - Target Column: `xcu_newsletter`
+   - Transformer: `boolean`
+4. Save
+
+The handler system (configured in `config/fieldkit-forms.php`) will automatically process these mappings.
+
+## Documentation
+
+For full documentation, see:
+
+- [FieldKit Core Documentation](https://github.com/ameax/fieldkit-core/tree/main/docs)
+- [Filament Integration Guide](https://github.com/ameax/fieldkit-core/blob/main/docs/filament/installation.md)
 
 ## Testing
 
@@ -76,7 +147,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
-- [Michael Schmidt](https://github.com/69188126+ms-aranes)
+- [Michael Schmidt](https://github.com/ms-aranes)
 - [All Contributors](../../contributors)
 
 ## License

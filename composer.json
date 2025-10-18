@@ -1,10 +1,14 @@
 {
     "name": "ameax/fieldkit-filament",
-    "description": "This is my package fieldkit-filament",
+    "description": "Filament admin panel integration for FieldKit - provides GUI for managing dynamic form fields and renders Filament form components",
     "keywords": [
         "ameax",
         "laravel",
-        "fieldkit-filament"
+        "fieldkit",
+        "filament",
+        "admin-panel",
+        "form-builder",
+        "dynamic-forms"
     ],
     "homepage": "https://github.com/ameax/fieldkit-filament",
     "license": "MIT",
