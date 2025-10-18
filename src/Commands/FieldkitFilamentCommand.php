@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace Ameax\FieldkitFilament\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class FieldkitFilamentCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'fieldkit-filament';
 
     public $description = 'My command';
 
