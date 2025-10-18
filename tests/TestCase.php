@@ -2,9 +2,9 @@
 
 namespace Ameax\FieldkitFilament\Tests;
 
+use Ameax\FieldkitFilament\FieldkitFilamentServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Ameax\FieldkitFilament\FieldkitFilamentServiceProvider;
 
 class TestCase extends Orchestra
 {

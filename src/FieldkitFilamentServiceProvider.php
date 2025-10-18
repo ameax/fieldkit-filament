@@ -2,9 +2,9 @@
 
 namespace Ameax\FieldkitFilament;
 
+use Ameax\FieldkitFilament\Commands\FieldkitFilamentCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Ameax\FieldkitFilament\Commands\FieldkitFilamentCommand;
 
 class FieldkitFilamentServiceProvider extends PackageServiceProvider
 {
