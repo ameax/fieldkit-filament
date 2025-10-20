@@ -200,17 +200,6 @@ class FieldDefinitionsRelationManager extends RelationManager
                                             ->collapsible(),
                                     ]),
 
-                                Section::make('Condition Logic')
-                                    ->schema([
-                                        Select::make('condition_logic')
-                                            ->label('Condition Logic')
-                                            ->options([
-                                                'AND' => 'All conditions must be met (AND)',
-                                                'OR' => 'Any condition can be met (OR)',
-                                            ])
-                                            ->default('AND')
-                                            ->helperText('How multiple conditions are evaluated'),
-                                    ]),
                             ]),
                     ])
                     ->columnSpanFull(),
