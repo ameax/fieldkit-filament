@@ -62,7 +62,7 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
 
             // Add conditional visibility if this field has conditions
             if (!empty($config['conditions'])) {
-                $component->visible(function (\Filament\Forms\Get $get) use ($config) {
+                $component->visible(function (\Filament\Schemas\Components\Utilities\Get $get) use ($config) {
                     return $this->evaluateConditions($config['conditions'], $get);
                 });
             }
@@ -102,7 +102,7 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
     /**
      * Evaluate conditions for field visibility (mirrors FieldKitDefinition::shouldDisplay)
      */
-    protected function evaluateConditions(array $conditions, \Filament\Forms\Get $get): bool
+    protected function evaluateConditions(array $conditions, \Filament\Schemas\Components\Utilities\Get $get): bool
     {
         if (empty($conditions)) {
             return true;
@@ -136,6 +136,20 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
 
                 case 'not_in':
                     if (in_array($actualValue, $expectedValues, true)) {
+                        return false;
+                    }
+                    break;
+
+                case 'equals':
+                    $expectedValue = $expectedValues[0] ?? null;
+                    if ($actualValue !== $expectedValue) {
+                        return false;
+                    }
+                    break;
+
+                case 'not_equals':
+                    $expectedValue = $expectedValues[0] ?? null;
+                    if ($actualValue === $expectedValue) {
                         return false;
                     }
                     break;
