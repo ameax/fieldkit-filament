@@ -123,15 +123,6 @@ class FieldKitDefinitionResource extends Resource
                                             ->placeholder('max:255|alpha_dash')
                                             ->helperText('Laravel validation syntax (e.g., max:255|alpha_dash)'),
 
-                                        TextInput::make('min_length')
-                                            ->label('Minimum Length')
-                                            ->numeric()
-                                            ->minValue(0),
-
-                                        TextInput::make('max_length')
-                                            ->label('Maximum Length')
-                                            ->numeric()
-                                            ->minValue(1),
                                     ])
                                     ->columns(2),
 
