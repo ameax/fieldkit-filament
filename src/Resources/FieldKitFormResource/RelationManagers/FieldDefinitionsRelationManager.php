@@ -2,88 +2,74 @@
 
 declare(strict_types=1);
 
-namespace Ameax\FieldkitFilament\Resources;
+namespace Ameax\FieldkitFilament\Resources\FieldKitFormResource\RelationManagers;
 
-use Ameax\FieldkitCore\Models\FieldKitDefinition;
-use Ameax\FieldkitCore\Models\FieldKitForm;
 use Ameax\FieldkitCore\FieldKitInputRegistry;
-use App\Filament\Resources\Resource;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables;
 use Filament\Tables\Table;
 
-class FieldKitDefinitionResource extends Resource
+class FieldDefinitionsRelationManager extends RelationManager
 {
-    protected static ?string $model = FieldKitDefinition::class;
+    protected static string $relationship = 'fields';
+    
+    protected static ?string $title = 'Field Definitions';
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-adjustments-horizontal';
-
-    protected static bool $shouldRegisterNavigation = false;
-
-    public static function form(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Tabs::make('Definition')
+                Tabs::make('Field Definition')
                     ->tabs([
                         Tab::make('Basic Settings')
                             ->schema([
-                                Section::make('Form & Context')
+                                Section::make('Field Configuration')
                                     ->schema([
-                                        Select::make('fieldkit_form_id')
-                                            ->label('Form')
-                                            ->relationship('form', 'name')
-                                            ->required()
-                                            ->searchable()
-                                            ->preload(),
-
-                                        TextInput::make('field_key')
+                                        TextInput::make('key')
                                             ->label('Field Key')
                                             ->required()
                                             ->unique(ignoreRecord: true)
                                             ->helperText('Unique identifier for this field (e.g., customer_phone)')
                                             ->placeholder('customer_phone'),
-                                    ])
-                                    ->columns(2),
 
-                                Section::make('Field Configuration')
-                                    ->schema([
                                         Select::make('type')
                                             ->label('Field Type')
                                             ->options(fn() => app(FieldKitInputRegistry::class)->getOptionsForAdmin())
                                             ->required()
-                                            ->disabled(fn(?FieldKitDefinition $record) =>
-                                                $record && $record->hasSubmittedData()
-                                            )
-                                            ->helperText(fn(?FieldKitDefinition $record) =>
-                                                $record && $record->hasSubmittedData()
-                                                    ? 'Type cannot be changed - field has existing data'
-                                                    : 'Select the field type'
-                                            ),
+                                            ->helperText('Select the field type'),
 
                                         TextInput::make('label')
                                             ->label('Label')
                                             ->required()
                                             ->placeholder('Phone Number'),
 
+                                        TextInput::make('sort_order')
+                                            ->label('Sort Order')
+                                            ->numeric()
+                                            ->default(0)
+                                            ->helperText('Fields are displayed in ascending order'),
+                                    ])
+                                    ->columns(2),
+
+                                Section::make('Display Settings')
+                                    ->schema([
                                         Textarea::make('description')
                                             ->label('Description')
                                             ->rows(2)
@@ -92,16 +78,6 @@ class FieldKitDefinitionResource extends Resource
                                         TextInput::make('placeholder')
                                             ->label('Placeholder')
                                             ->placeholder('+1 (555) 123-4567'),
-                                    ])
-                                    ->columns(2),
-
-                                Section::make('Display Settings')
-                                    ->schema([
-                                        TextInput::make('sort_order')
-                                            ->label('Sort Order')
-                                            ->numeric()
-                                            ->default(0)
-                                            ->helperText('Fields are displayed in ascending order'),
 
                                         Toggle::make('is_active')
                                             ->label('Active')
@@ -155,18 +131,18 @@ class FieldKitDefinitionResource extends Resource
                                             ->content('Options are managed through the Options relation manager below this form.'),
                                     ]),
                             ])
-                            ->visible(fn(?FieldKitDefinition $record) =>
-                                $record && in_array($record->type, ['select', 'radio'])
+                            ->visible(fn(?object $record) =>
+                                $record && in_array($record->type ?? '', ['select', 'radio'])
                             ),
 
                         Tab::make('External Mappings')
                             ->schema([
                                 Section::make('System Integrations')
                                     ->schema([
-                                        Repeater::make('external_mappings')
+                                        Repeater::make('mappings')
                                             ->label('External Mappings')
                                             ->schema([
-                                                Select::make('adapter_type')
+                                                Select::make('adapter')
                                                     ->label('Adapter Type')
                                                     ->options([
                                                         'ameax_column' => 'Ameax Database Column',
@@ -181,11 +157,17 @@ class FieldKitDefinitionResource extends Resource
                                                     ->placeholder('customer.phone_number')
                                                     ->helperText('Dot notation path (e.g., customer.phone_number)'),
 
-                                                KeyValue::make('config')
-                                                    ->label('Configuration')
+                                                KeyValue::make('transformations')
+                                                    ->label('Transformations')
                                                     ->keyLabel('Key')
                                                     ->valueLabel('Value')
-                                                    ->helperText('Additional configuration for this mapping'),
+                                                    ->helperText('Additional transformations for this mapping'),
+
+                                                KeyValue::make('conditions')
+                                                    ->label('Conditions')
+                                                    ->keyLabel('Key')
+                                                    ->valueLabel('Value')
+                                                    ->helperText('Conditions for this mapping'),
                                             ])
                                             ->columns(1)
                                             ->defaultItems(0)
@@ -253,75 +235,84 @@ class FieldKitDefinitionResource extends Resource
             ]);
     }
 
-    public static function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
+            ->recordTitleAttribute('label')
             ->columns([
-                TextColumn::make('form.name')
-                    ->label('Form')
-                    ->searchable()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('sort_order')
+                    ->label('#')
+                    ->sortable()
+                    ->width(60),
 
-                TextColumn::make('field_key')
+                Tables\Columns\TextColumn::make('key')
                     ->label('Field Key')
                     ->searchable()
-                    ->sortable(),
+                    ->copyable()
+                    ->weight('medium'),
 
-                TextColumn::make('type')
+                Tables\Columns\TextColumn::make('label')
+                    ->label('Display Label')
+                    ->searchable()
+                    ->weight('bold'),
+
+                Tables\Columns\BadgeColumn::make('type')
                     ->label('Type')
-                    ->searchable()
-                    ->sortable()
-                    ->badge(),
+                    ->colors([
+                        'primary' => 'text',
+                        'success' => 'email',
+                        'warning' => 'number',
+                        'info' => 'select',
+                        'secondary' => 'radio',
+                        'danger' => 'checkbox',
+                        'gray' => 'textarea',
+                    ]),
 
-                TextColumn::make('label')
-                    ->label('Label')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('sort_order')
-                    ->label('Order')
-                    ->sortable()
-                    ->alignCenter(),
-
-                IconColumn::make('is_required')
+                Tables\Columns\IconColumn::make('is_required')
                     ->label('Required')
                     ->boolean()
-                    ->sortable(),
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('gray'),
 
-                IconColumn::make('is_active')
+                Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean()
-                    ->sortable(),
+                    ->trueIcon('heroicon-o-eye')
+                    ->falseIcon('heroicon-o-eye-slash')
+                    ->trueColor('success')
+                    ->falseColor('danger'),
 
-                TextColumn::make('options_count')
+                Tables\Columns\TextColumn::make('options_count')
                     ->label('Options')
                     ->counts('options')
-                    ->sortable()
-                    ->alignCenter()
-                    ->visible(fn($record) => in_array($record?->type, ['select', 'radio'])),
-
-                TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->badge()
+                    ->color('info')
+                    ->toggleable(),
             ])
             ->filters([
-                SelectFilter::make('fieldkit_form_id')
-                    ->label('Form')
-                    ->relationship('form', 'name')
-                    ->searchable()
-                    ->preload(),
+                Tables\Filters\SelectFilter::make('type')
+                    ->label('Field Type')
+                    ->options([
+                        'text' => 'Text Input',
+                        'email' => 'Email Input',
+                        'number' => 'Number Input',
+                        'textarea' => 'Textarea',
+                        'select' => 'Select Dropdown',
+                        'radio' => 'Radio Buttons',
+                        'checkbox' => 'Checkbox',
+                    ]),
 
-                SelectFilter::make('type')
-                    ->label('Type')
-                    ->options(fn() => app(FieldKitInputRegistry::class)->getOptionsForAdmin()),
+                Tables\Filters\TernaryFilter::make('is_required')
+                    ->label('Required Fields'),
 
-                TernaryFilter::make('is_required')
-                    ->label('Required'),
-
-                TernaryFilter::make('is_active')
-                    ->label('Active Status'),
+                Tables\Filters\TernaryFilter::make('is_active')
+                    ->label('Active Fields'),
+            ])
+            ->headerActions([
+                CreateAction::make()
+                    ->label('Add Field'),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -332,22 +323,7 @@ class FieldKitDefinitionResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('sort_order', 'asc');
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            \Ameax\FieldkitFilament\Resources\FieldKitDefinitionResource\RelationManagers\OptionsRelationManager::class,
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => \Ameax\FieldkitFilament\Resources\FieldKitDefinitionResource\Pages\ListFieldKitDefinitions::route('/'),
-            'create' => \Ameax\FieldkitFilament\Resources\FieldKitDefinitionResource\Pages\CreateFieldKitDefinition::route('/create'),
-            'edit' => \Ameax\FieldkitFilament\Resources\FieldKitDefinitionResource\Pages\EditFieldKitDefinition::route('/{record}/edit'),
-        ];
+            ->defaultSort('sort_order')
+            ->reorderable('sort_order');
     }
 }
