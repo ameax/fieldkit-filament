@@ -102,15 +102,6 @@ class FieldDefinitionsRelationManager extends RelationManager
                                     ])
                                     ->columns(2),
 
-                                Section::make('Custom Validation Messages')
-                                    ->schema([
-                                        KeyValue::make('validation_messages')
-                                            ->label('Custom Error Messages')
-                                            ->keyLabel('Rule')
-                                            ->valueLabel('Message')
-                                            ->helperText('Override default validation messages (e.g., required => "This field is mandatory")')
-                                            ->addActionLabel('Add Message'),
-                                    ]),
                             ]),
 
                         Tab::make('Options')
