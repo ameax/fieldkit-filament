@@ -243,12 +243,19 @@ class FieldKitDefinitionResource extends Resource
                                                         'equals' => 'Value equals',
                                                         'not_equals' => 'Value does not equal',
                                                     ])
-                                                    ->required(),
+                                                    ->required()
+                                                    ->live(onBlur: true),
+
+                                                TextInput::make('expected_values')
+                                                    ->label('Expected Value')
+                                                    ->helperText('Single value that will show/hide this field')
+                                                    ->visible(fn (Get $get) => in_array($get('operator'), ['equals', 'not_equals'])),
 
                                                 TagsInput::make('expected_values')
                                                     ->label('Expected Values')
                                                     ->helperText('Values that will show/hide this field')
-                                                    ->separator(','),
+                                                    ->separator(',')
+                                                    ->visible(fn (Get $get) => in_array($get('operator'), ['in', 'not_in'])),
                                             ])
                                             ->columns(2)
                                             ->defaultItems(0)

@@ -111,7 +111,7 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
         // ALL conditions must be met (AND)
         foreach ($conditions as $condition) {
             $fieldKey = $condition['field_key'] ?? null;
-            $expectedValues = $condition['answer_values'] ?? [];
+            $expectedValues = explode(',', $condition['expected_values']);
             $operator = $condition['operator'] ?? 'in';
 
             // Get value from form
@@ -129,31 +129,16 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
 
             switch ($operator) {
                 case 'in':
-                    if (! in_array($actualValue, $expectedValues, true)) {
-                        return false;
-                    }
-                    break;
-
+                    return in_array($actualValue, $expectedValues, true);
                 case 'not_in':
-                    if (in_array($actualValue, $expectedValues, true)) {
-                        return false;
-                    }
-                    break;
-
+                    return !in_array($actualValue, $expectedValues, true);
                 case 'equals':
                     $expectedValue = $expectedValues[0] ?? null;
-                    if ($actualValue !== $expectedValue) {
-                        return false;
-                    }
-                    break;
-
+                    return $actualValue !== $expectedValue;
                 case 'not_equals':
                     $expectedValue = $expectedValues[0] ?? null;
-                    if ($actualValue === $expectedValue) {
-                        return false;
-                    }
-                    break;
 
+                    return $actualValue === $expectedValue;
                 default:
                     return false; // Unknown operator
             }
