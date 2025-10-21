@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ameax\FieldkitFilament\Resources\FieldKitFormResource\RelationManagers;
 
 use Ameax\FieldkitCore\FieldKitInputRegistry;
+use App\Helpers\ArrayHelper;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -26,12 +27,31 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 class FieldDefinitionsRelationManager extends RelationManager
 {
     protected static string $relationship = 'fields';
-    
+
     protected static ?string $title = 'Field Definitions';
+
+    protected ?string $tempQuickOptions = null;
+
+    protected function processQuickOptions($record, array $data): void
+    {
+        if (!empty($data['quick_options']) && in_array($record->type, ['select', 'radio'])) {
+            $lines = ArrayHelper::fromString($data['quick_options']);
+            foreach ($lines as $index => $label) {
+                if (!empty($label)) {
+                    $record->options()->create([
+                        'value' => Str::slug($label, separator: '_'),
+                        'label' => $label,
+                        'sort_order' => $index + 1,
+                    ]);
+                }
+            }
+        }
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -46,7 +66,23 @@ class FieldDefinitionsRelationManager extends RelationManager
                                         TextInput::make('key')
                                             ->label('Field Key')
                                             ->required()
-                                            ->unique(ignoreRecord: true)
+                                            ->unique(
+                                                table: 'fieldkit_definitions',
+                                                column: 'key',
+                                                ignoreRecord: true,
+                                                modifyRuleUsing: function ($rule) {
+                                                    return $rule->where('fieldkit_form_id', $this->getOwnerRecord()->id);
+                                                }
+                                            )
+                                            ->afterStateUpdated(function (string $operation, $state, callable $set) {
+                                                if ($operation !== 'create') {
+                                                    return;
+                                                }
+
+                                                $set('key', Str::slug($state, separator: '_'));
+                                            })
+                                            ->live(onBlur: true)
+                                            ->autofocus()
                                             ->helperText('Unique identifier for this field (e.g., customer_phone)')
                                             ->placeholder('customer_phone'),
 
@@ -54,18 +90,30 @@ class FieldDefinitionsRelationManager extends RelationManager
                                             ->label('Field Type')
                                             ->options(fn() => app(FieldKitInputRegistry::class)->getOptionsForAdmin())
                                             ->required()
+                                            ->live()
                                             ->helperText('Select the field type'),
 
                                         TextInput::make('label')
                                             ->label('Label')
-                                            ->required()
-                                            ->placeholder('Phone Number'),
+                                            ->required(),
 
                                         TextInput::make('sort_order')
                                             ->label('Sort Order')
                                             ->numeric()
-                                            ->default(0)
+                                            ->default(function () {
+                                                $maxSort = $this->getOwnerRecord()->fields()->max('sort_order') ?? 1;
+                                                return $maxSort + 1;
+                                            })
                                             ->helperText('Fields are displayed in ascending order'),
+
+                                         Textarea::make('quick_options')
+                                            ->label('Options')
+                                            ->rows(5)
+                                             ->columnSpanFull()
+                                            ->helperText('Enter one option per line. Each will create an option with the label as display and slug as value.')
+                                            ->visible(fn(Get $get, string $operation) => 
+                                                $operation === 'create' && in_array($get('type'), ['select', 'radio'])
+                                            ),
                                     ])
                                     ->columns(2),
 
@@ -73,12 +121,10 @@ class FieldDefinitionsRelationManager extends RelationManager
                                     ->schema([
                                         Textarea::make('description')
                                             ->label('Description')
-                                            ->rows(2)
-                                            ->placeholder('Enter your phone number'),
+                                            ->rows(2),
 
                                         TextInput::make('placeholder')
-                                            ->label('Placeholder')
-                                            ->placeholder('+1 (555) 123-4567'),
+                                            ->label('Placeholder'),
 
                                         Toggle::make('is_active')
                                             ->label('Active')
@@ -118,28 +164,28 @@ class FieldDefinitionsRelationManager extends RelationManager
                                                     ->required()
                                                     ->placeholder('yes')
                                                     ->helperText('The actual value stored when this option is selected'),
-                                                
+
                                                 TextInput::make('label')
                                                     ->label('Label')
                                                     ->required()
                                                     ->placeholder('Yes')
                                                     ->helperText('The text shown to users'),
-                                                
+
                                                 TextInput::make('description')
                                                     ->label('Description')
                                                     ->placeholder('Optional description')
                                                     ->helperText('Additional description text'),
-                                                
+
                                                 TextInput::make('icon')
                                                     ->label('Icon')
                                                     ->placeholder('heroicon-o-check')
                                                     ->helperText('Optional Heroicon name'),
-                                                
+
                                                 TextInput::make('external_identifier')
                                                     ->label('External ID')
                                                     ->placeholder('ext_123')
                                                     ->helperText('External system identifier'),
-                                                
+
                                                 TextInput::make('sort_order')
                                                     ->label('Sort Order')
                                                     ->numeric()
@@ -151,8 +197,8 @@ class FieldDefinitionsRelationManager extends RelationManager
                                             ->addActionLabel('Add Option')
                                             ->reorderableWithButtons()
                                             ->collapsible()
-                                            ->collapsed(false)
-                                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? $state['value'] ?? null),
+                                            ->collapsed(true)
+                                            ->itemLabel(fn(array $state): ?string => $state['label'] ?? $state['value'] ?? null),
                                     ])
                                     ->description('Add options for select and radio fields. Users will see the label but the value will be stored.'),
                             ])
@@ -216,6 +262,7 @@ class FieldDefinitionsRelationManager extends RelationManager
                                                     ->live(),
 
                                                 TextInput::make('field_key')
+                                                    ->autofocus()
                                                     ->label('Field Key')
                                                     ->required()
                                                     ->helperText('Key of the field this depends on'),
@@ -324,7 +371,21 @@ class FieldDefinitionsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('Add Field'),
+                    ->createAnother(false)
+                    ->label('Add Field')
+                    ->mutateFormDataUsing(function (array $data): array {
+                        // Store quick_options for later processing but remove from data to save
+                        $this->tempQuickOptions = $data['quick_options'] ?? null;
+                        unset($data['quick_options']);
+                        return $data;
+                    })
+                    ->after(function ($record) {
+                        // Process the quick options after record creation
+                        if ($this->tempQuickOptions) {
+                            $this->processQuickOptions($record, ['quick_options' => $this->tempQuickOptions]);
+                            $this->tempQuickOptions = null;
+                        }
+                    }),
             ])
             ->recordActions([
                 EditAction::make(),

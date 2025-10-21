@@ -57,7 +57,7 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
 
             // Make field live() if it's referenced as a dependency in other fields' conditions
             if ($this->isFieldDependency($name, $config)) {
-                $component->live();
+                $component->live(onBlur: true);
             }
 
             // Add conditional visibility if this field has conditions

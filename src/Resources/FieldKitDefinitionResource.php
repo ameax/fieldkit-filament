@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ameax\FieldkitFilament\Resources;
 
 use Ameax\FieldkitCore\Models\FieldKitDefinition;
-use Ameax\FieldkitCore\Models\FieldKitForm;
 use Ameax\FieldkitCore\FieldKitInputRegistry;
 use App\Filament\Resources\Resource;
 use Filament\Actions\BulkActionGroup;
@@ -18,12 +17,11 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\Utilities\Get;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TagsInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -57,6 +55,7 @@ class FieldKitDefinitionResource extends Resource
                                             ->preload(),
 
                                         TextInput::make('field_key')
+                                            ->autofocus()
                                             ->label('Field Key')
                                             ->required()
                                             ->unique(ignoreRecord: true)
@@ -175,7 +174,7 @@ class FieldKitDefinitionResource extends Resource
                                             ->addActionLabel('Add Option')
                                             ->reorderableWithButtons()
                                             ->collapsible()
-                                            ->collapsed(false)
+                                            ->collapsed()
                                             ->itemLabel(fn (array $state): ?string => $state['label'] ?? $state['value'] ?? null),
                                     ])
                                     ->description('Add options for select and radio fields. Users will see the label but the value will be stored.'),

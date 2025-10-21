@@ -10,8 +10,8 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -19,6 +19,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 class FieldKitFormResource extends Resource
 {
@@ -48,17 +49,25 @@ class FieldKitFormResource extends Resource
                             ->unique(ignoreRecord: true)
                             ->helperText('Unique identifier for this form (e.g., customer_registration)')
                             ->placeholder('customer_registration'),
-                        
+
                         TextInput::make('name')
                             ->label('Form Name')
                             ->required()
-                            ->placeholder('Customer Registration'),
-                        
+                            ->placeholder('Customer Registration')
+                            ->afterStateUpdated(function (string $operation, $state, callable $set) {
+                                if ($operation !== 'create') {
+                                    return;
+                                }
+
+                                $set('purpose_token', Str::slug($state, separator: '_'));
+                            })
+                            ->live(onBlur: true),
+
                         Textarea::make('description')
                             ->label('Description')
                             ->rows(3)
                             ->placeholder('Additional fields for customer registration'),
-                        
+
                         Toggle::make('is_active')
                             ->label('Active')
                             ->default(true),
@@ -70,7 +79,7 @@ class FieldKitFormResource extends Resource
                         TextInput::make('owner_type')
                             ->label('Owner Type')
                             ->placeholder('App\\Models\\Shop'),
-                        
+
                         TextInput::make('owner_id')
                             ->label('Owner ID')
                             ->numeric(),
@@ -89,22 +98,22 @@ class FieldKitFormResource extends Resource
                     ->label('Purpose Token')
                     ->searchable()
                     ->sortable(),
-                
+
                 TextColumn::make('name')
                     ->label('Form Name')
                     ->searchable()
                     ->sortable(),
-                
+
                 TextColumn::make('fields_count')
                     ->label('Fields')
                     ->counts('fields')
                     ->sortable(),
-                
+
                 IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean()
                     ->sortable(),
-                
+
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
