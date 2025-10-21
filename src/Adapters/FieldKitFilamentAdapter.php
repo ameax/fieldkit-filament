@@ -111,8 +111,8 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
         // ALL conditions must be met (AND)
         foreach ($conditions as $condition) {
             $fieldKey = $condition['field_key'] ?? null;
-            $expectedValues = explode(',', $condition['expected_values']);
             $operator = $condition['operator'] ?? 'in';
+            $rawExpectedValues = $condition['expected_values'] ?? '';
 
             // Get value from form
             $actualValue = $get($fieldKey);
@@ -127,18 +127,30 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
                 $actualValue = $actualValue ? 'true' : 'false';
             }
 
+            // Handle expected values based on operator
             switch ($operator) {
                 case 'in':
-                    return in_array($actualValue, $expectedValues, true);
                 case 'not_in':
-                    return !in_array($actualValue, $expectedValues, true);
+                    // For list operators, explode to array
+                    $expectedValues = explode(',', $rawExpectedValues);
+                    $expectedValues = array_map('trim', $expectedValues); // Remove whitespace
+                    
+                    if ($operator === 'in') {
+                        return in_array($actualValue, $expectedValues, true);
+                    } else {
+                        return !in_array($actualValue, $expectedValues, true);
+                    }
+                    
                 case 'equals':
-                    $expectedValue = $expectedValues[0] ?? null;
-                    return $actualValue !== $expectedValue;
-                case 'not_equals':
-                    $expectedValue = $expectedValues[0] ?? null;
-
+                    // For single value operators, use as string
+                    $expectedValue = trim($rawExpectedValues);
                     return $actualValue === $expectedValue;
+                    
+                case 'not_equals':
+                    // For single value operators, use as string
+                    $expectedValue = trim($rawExpectedValues);
+                    return $actualValue !== $expectedValue;
+                    
                 default:
                     return false; // Unknown operator
             }
