@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Ameax\FieldkitFilament\Resources;
 
-use Ameax\FieldkitCore\Models\FieldKitDefinition;
 use Ameax\FieldkitCore\FieldKitInputRegistry;
+use Ameax\FieldkitCore\Models\FieldKitDefinition;
 use App\Filament\Resources\Resource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -68,13 +68,11 @@ class FieldKitDefinitionResource extends Resource
                                     ->schema([
                                         Select::make('type')
                                             ->label('Field Type')
-                                            ->options(fn() => app(FieldKitInputRegistry::class)->getOptionsForAdmin())
+                                            ->options(fn () => app(FieldKitInputRegistry::class)->getOptionsForAdmin())
                                             ->required()
-                                            ->disabled(fn(?FieldKitDefinition $record) =>
-                                                $record && $record->hasSubmittedData()
+                                            ->disabled(fn (?FieldKitDefinition $record) => $record && $record->hasSubmittedData()
                                             )
-                                            ->helperText(fn(?FieldKitDefinition $record) =>
-                                                $record && $record->hasSubmittedData()
+                                            ->helperText(fn (?FieldKitDefinition $record) => $record && $record->hasSubmittedData()
                                                     ? 'Type cannot be changed - field has existing data'
                                                     : 'Select the field type'
                                             ),
@@ -141,28 +139,28 @@ class FieldKitDefinitionResource extends Resource
                                                     ->required()
                                                     ->placeholder('yes')
                                                     ->helperText('The actual value stored when this option is selected'),
-                                                
+
                                                 TextInput::make('label')
                                                     ->label('Label')
                                                     ->required()
                                                     ->placeholder('Yes')
                                                     ->helperText('The text shown to users'),
-                                                
+
                                                 TextInput::make('description')
                                                     ->label('Description')
                                                     ->placeholder('Optional description')
                                                     ->helperText('Additional description text'),
-                                                
+
                                                 TextInput::make('icon')
                                                     ->label('Icon')
                                                     ->placeholder('heroicon-o-check')
                                                     ->helperText('Optional Heroicon name'),
-                                                
+
                                                 TextInput::make('external_identifier')
                                                     ->label('External ID')
                                                     ->placeholder('ext_123')
                                                     ->helperText('External system identifier'),
-                                                
+
                                                 TextInput::make('sort_order')
                                                     ->label('Sort Order')
                                                     ->numeric()
@@ -179,7 +177,7 @@ class FieldKitDefinitionResource extends Resource
                                     ])
                                     ->description('Add options for select and radio fields. Users will see the label but the value will be stored.'),
                             ])
-                            ->visible(fn(Get $get) => in_array($get('type'), ['select', 'radio'])),
+                            ->visible(fn (Get $get) => in_array($get('type'), ['select', 'radio'])),
 
                         Tab::make('External Mappings')
                             ->schema([
@@ -309,7 +307,7 @@ class FieldKitDefinitionResource extends Resource
                     ->counts('options')
                     ->sortable()
                     ->alignCenter()
-                    ->visible(fn($record) => in_array($record?->type, ['select', 'radio'])),
+                    ->visible(fn ($record) => in_array($record?->type, ['select', 'radio'])),
 
                 TextColumn::make('created_at')
                     ->label('Created')
@@ -326,7 +324,7 @@ class FieldKitDefinitionResource extends Resource
 
                 SelectFilter::make('type')
                     ->label('Type')
-                    ->options(fn() => app(FieldKitInputRegistry::class)->getOptionsForAdmin()),
+                    ->options(fn () => app(FieldKitInputRegistry::class)->getOptionsForAdmin()),
 
                 TernaryFilter::make('is_required')
                     ->label('Required'),

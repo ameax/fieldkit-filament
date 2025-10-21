@@ -22,7 +22,7 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
     {
         return in_array($type, [
             'text',
-            'email', 
+            'email',
             'number',
             'textarea',
             'checkbox',
@@ -39,7 +39,7 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
         $placeholder = $config['placeholder'] ?? null;
         $description = $config['description'] ?? null;
 
-        $component = match($type) {
+        $component = match ($type) {
             'text' => $this->createTextInput($name, $config),
             'email' => $this->createEmailInput($name, $config),
             'number' => $this->createNumberInput($name, $config),
@@ -61,7 +61,7 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
             }
 
             // Add conditional visibility if this field has conditions
-            if (!empty($config['conditions'])) {
+            if (! empty($config['conditions'])) {
                 $component->visible(function (\Filament\Schemas\Components\Utilities\Get $get) use ($config) {
                     return $this->evaluateConditions($config['conditions'], $get);
                 });
@@ -86,7 +86,7 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
     {
         // Check if this field is referenced in any condition's field_key
         $allFields = $config['all_fields'] ?? [];
-        
+
         foreach ($allFields as $field) {
             $conditions = $field['conditions'] ?? [];
             foreach ($conditions as $condition) {
@@ -95,7 +95,7 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
                 }
             }
         }
-        
+
         return false;
     }
 
@@ -129,7 +129,7 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
 
             switch ($operator) {
                 case 'in':
-                    if (!in_array($actualValue, $expectedValues, true)) {
+                    if (! in_array($actualValue, $expectedValues, true)) {
                         return false;
                     }
                     break;

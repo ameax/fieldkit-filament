@@ -37,10 +37,10 @@ class TestCase extends Orchestra
             'database' => ':memory:',
             'prefix' => '',
         ]);
-        
+
         // Queue configuration for testing
         config()->set('queue.default', 'sync');
-        
+
         // FieldKit configuration for testing
         config()->set('fieldkit.input_types', [
             'text' => \Ameax\FieldkitCore\Inputs\FieldKitTextInput::class,
@@ -51,7 +51,7 @@ class TestCase extends Orchestra
             'select' => \Ameax\FieldkitCore\Inputs\FieldKitSelectInput::class,
             'radio' => \Ameax\FieldkitCore\Inputs\FieldKitRadioInput::class,
         ]);
-        
+
         config()->set('fieldkit.definition_sources', [
             'config' => ['priority' => 200],
             'database' => ['priority' => 100],
@@ -60,14 +60,14 @@ class TestCase extends Orchestra
                 'path' => storage_path('fieldkit'),
             ],
         ]);
-        
+
         config()->set('fieldkit.handlers', []);
 
-        $this->loadMigrationsFrom(__DIR__ . '/../../../fieldkit-core/database/migrations');
-        
+        $this->loadMigrationsFrom(__DIR__.'/../../../fieldkit-core/database/migrations');
+
         // Load main app migrations for User model if needed
-        if (file_exists(__DIR__ . '/../../../../database/migrations')) {
-            $this->loadMigrationsFrom(__DIR__ . '/../../../../database/migrations');
+        if (file_exists(__DIR__.'/../../../../database/migrations')) {
+            $this->loadMigrationsFrom(__DIR__.'/../../../../database/migrations');
         }
     }
 }

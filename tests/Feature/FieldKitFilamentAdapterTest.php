@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use Ameax\FieldkitFilament\Adapters\FieldKitFilamentAdapter;
 use Ameax\FieldkitCore\Models\FieldKitDefinition;
 use Ameax\FieldkitCore\Models\FieldKitOption;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
+use Ameax\FieldkitFilament\Adapters\FieldKitFilamentAdapter;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 
 beforeEach(function () {
-    $this->adapter = new FieldKitFilamentAdapter();
+    $this->adapter = new FieldKitFilamentAdapter;
 });
 
 it('creates text input component', function () {
@@ -21,9 +21,9 @@ it('creates text input component', function () {
         'placeholder' => '+1 (555) 123-4567',
         'is_required' => true,
     ]);
-    
+
     $component = $this->adapter->createComponent($definition);
-    
+
     expect($component)->toBeInstanceOf(TextInput::class);
     expect($component->getName())->toBe('phone');
     expect($component->getLabel())->toBe('Phone Number');
@@ -37,9 +37,9 @@ it('creates email input component', function () {
         'label' => 'Email Address',
         'is_required' => true,
     ]);
-    
+
     $component = $this->adapter->createComponent($definition);
-    
+
     expect($component)->toBeInstanceOf(TextInput::class);
     expect($component->getName())->toBe('email');
     expect($component->getLabel())->toBe('Email Address');
@@ -53,7 +53,7 @@ it('creates select component with options', function () {
         'label' => 'Category',
         'is_required' => true,
     ]);
-    
+
     // Mock the options relationship
     $definition->setRelation('options', collect([
         new FieldKitOption([
@@ -67,9 +67,9 @@ it('creates select component with options', function () {
             'sort_order' => 2,
         ]),
     ]));
-    
+
     $component = $this->adapter->createComponent($definition);
-    
+
     expect($component)->toBeInstanceOf(Select::class);
     expect($component->getName())->toBe('category');
     expect($component->getLabel())->toBe('Category');
@@ -83,9 +83,9 @@ it('creates checkbox component', function () {
         'label' => 'Subscribe to Newsletter',
         'is_required' => false,
     ]);
-    
+
     $component = $this->adapter->createComponent($definition);
-    
+
     expect($component)->toBeInstanceOf(Checkbox::class);
     expect($component->getName())->toBe('newsletter');
     expect($component->getLabel())->toBe('Subscribe to Newsletter');
@@ -102,9 +102,9 @@ it('applies validation rules correctly', function () {
         'min_length' => 5,
         'max_length' => 20,
     ]);
-    
+
     $component = $this->adapter->createComponent($definition);
-    
+
     expect($component)->toBeInstanceOf(TextInput::class);
     expect($component->isRequired())->toBeTrue();
 });
@@ -119,13 +119,13 @@ it('applies conditional visibility correctly', function () {
                 'field_type' => 'native',
                 'field_key' => 'customer_type',
                 'operator' => 'equals',
-                'expected_values' => ['business']
-            ]
+                'expected_values' => ['business'],
+            ],
         ],
     ]);
-    
+
     $component = $this->adapter->createComponent($definition);
-    
+
     expect($component)->toBeInstanceOf(TextInput::class);
     expect($component->getName())->toBe('company_phone');
 });
@@ -147,9 +147,9 @@ it('converts form schema correctly', function () {
             'sort_order' => 2,
         ]),
     ]);
-    
+
     $schema = $this->adapter->convertToSchema($definitions);
-    
+
     expect($schema)->toBeArray();
     expect($schema)->toHaveCount(2);
     expect($schema[0])->toBeInstanceOf(TextInput::class);
@@ -164,6 +164,6 @@ it('throws exception for unsupported input type', function () {
         'type' => 'unsupported_type',
         'label' => 'Test',
     ]);
-    
+
     $this->adapter->createComponent($definition);
 })->throws(InvalidArgumentException::class, 'Unsupported input type: unsupported_type');

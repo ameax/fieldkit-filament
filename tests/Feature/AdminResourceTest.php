@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-use Ameax\FieldkitFilament\Resources\FieldKitFormResource;
-use Ameax\FieldkitFilament\Resources\FieldKitDefinitionResource;
-use Ameax\FieldkitFilament\Resources\FieldKitFormResource\Pages\ListFieldKitForms;
-use Ameax\FieldkitFilament\Resources\FieldKitDefinitionResource\Pages\ListFieldKitDefinitions;
-use Ameax\FieldkitCore\Models\FieldKitForm;
 use Ameax\FieldkitCore\Models\FieldKitDefinition;
+use Ameax\FieldkitCore\Models\FieldKitForm;
+use Ameax\FieldkitFilament\Resources\FieldKitDefinitionResource\Pages\ListFieldKitDefinitions;
+use Ameax\FieldkitFilament\Resources\FieldKitFormResource\Pages\ListFieldKitForms;
 use Filament\Facades\Filament;
 
 beforeEach(function () {
@@ -21,13 +19,13 @@ it('can list fieldkit forms', function () {
         'name' => 'Customer Registration',
         'is_active' => true,
     ]);
-    
+
     $form2 = FieldKitForm::factory()->create([
         'purpose_token' => 'checkout_additional',
         'name' => 'Checkout Additional Fields',
         'is_active' => false,
     ]);
-    
+
     \Livewire\Livewire::test(ListFieldKitForms::class)
         ->assertCanSeeTableRecords([$form1, $form2])
         ->assertTableColumnExists('purpose_token')
@@ -45,7 +43,7 @@ it('can create fieldkit form', function () {
         ])
         ->call('create')
         ->assertHasNoFormErrors();
-    
+
     $this->assertDatabaseHas('fieldkit_forms', [
         'purpose_token' => 'test_form',
         'name' => 'Test Form',
@@ -59,7 +57,7 @@ it('can edit fieldkit form', function () {
         'purpose_token' => 'original_token',
         'name' => 'Original Name',
     ]);
-    
+
     \Livewire\Livewire::test(\Ameax\FieldkitFilament\Resources\FieldKitFormResource\Pages\EditFieldKitForm::class, [
         'record' => $form->getRouteKey(),
     ])
@@ -69,16 +67,16 @@ it('can edit fieldkit form', function () {
         ])
         ->call('save')
         ->assertHasNoFormErrors();
-    
+
     $form->refresh();
-    
+
     expect($form->name)->toBe('Updated Name');
     expect($form->description)->toBe('Updated description');
 });
 
 it('can list fieldkit definitions', function () {
     $form = FieldKitForm::factory()->create();
-    
+
     $definition1 = FieldKitDefinition::factory()->create([
         'fieldkit_form_id' => $form->id,
         'field_key' => 'email',
@@ -86,7 +84,7 @@ it('can list fieldkit definitions', function () {
         'label' => 'Email Address',
         'is_active' => true,
     ]);
-    
+
     $definition2 = FieldKitDefinition::factory()->create([
         'fieldkit_form_id' => $form->id,
         'field_key' => 'phone',
@@ -94,7 +92,7 @@ it('can list fieldkit definitions', function () {
         'label' => 'Phone Number',
         'is_active' => false,
     ]);
-    
+
     \Livewire\Livewire::test(ListFieldKitDefinitions::class)
         ->assertCanSeeTableRecords([$definition1, $definition2])
         ->assertTableColumnExists('field_key')
@@ -105,7 +103,7 @@ it('can list fieldkit definitions', function () {
 
 it('can create fieldkit definition', function () {
     $form = FieldKitForm::factory()->create();
-    
+
     \Livewire\Livewire::test(\Ameax\FieldkitFilament\Resources\FieldKitDefinitionResource\Pages\CreateFieldKitDefinition::class)
         ->fillForm([
             'fieldkit_form_id' => $form->id,
@@ -118,7 +116,7 @@ it('can create fieldkit definition', function () {
         ])
         ->call('create')
         ->assertHasNoFormErrors();
-    
+
     $this->assertDatabaseHas('fieldkit_definitions', [
         'fieldkit_form_id' => $form->id,
         'field_key' => 'test_field',
@@ -132,17 +130,17 @@ it('can create fieldkit definition', function () {
 it('can filter definitions by form', function () {
     $form1 = FieldKitForm::factory()->create(['name' => 'Form 1']);
     $form2 = FieldKitForm::factory()->create(['name' => 'Form 2']);
-    
+
     $definition1 = FieldKitDefinition::factory()->create([
         'fieldkit_form_id' => $form1->id,
         'field_key' => 'field1',
     ]);
-    
+
     $definition2 = FieldKitDefinition::factory()->create([
         'fieldkit_form_id' => $form2->id,
         'field_key' => 'field2',
     ]);
-    
+
     \Livewire\Livewire::test(ListFieldKitDefinitions::class)
         ->filterTable('fieldkit_form_id', $form1->id)
         ->assertCanSeeTableRecords([$definition1])
@@ -151,17 +149,17 @@ it('can filter definitions by form', function () {
 
 it('can filter definitions by type', function () {
     $form = FieldKitForm::factory()->create();
-    
+
     $textDefinition = FieldKitDefinition::factory()->create([
         'fieldkit_form_id' => $form->id,
         'type' => 'text',
     ]);
-    
+
     $emailDefinition = FieldKitDefinition::factory()->create([
         'fieldkit_form_id' => $form->id,
         'type' => 'email',
     ]);
-    
+
     \Livewire\Livewire::test(ListFieldKitDefinitions::class)
         ->filterTable('type', 'text')
         ->assertCanSeeTableRecords([$textDefinition])

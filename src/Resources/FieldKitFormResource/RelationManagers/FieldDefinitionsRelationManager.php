@@ -12,18 +12,17 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -39,10 +38,10 @@ class FieldDefinitionsRelationManager extends RelationManager
 
     protected function processQuickOptions($record, array $data): void
     {
-        if (!empty($data['quick_options']) && in_array($record->type, ['select', 'radio'])) {
+        if (! empty($data['quick_options']) && in_array($record->type, ['select', 'radio'])) {
             $lines = ArrayHelper::fromString($data['quick_options']);
             foreach ($lines as $index => $label) {
-                if (!empty($label)) {
+                if (! empty($label)) {
                     $record->options()->create([
                         'value' => Str::slug($label, separator: '_'),
                         'label' => $label,
@@ -88,7 +87,7 @@ class FieldDefinitionsRelationManager extends RelationManager
 
                                         Select::make('type')
                                             ->label('Field Type')
-                                            ->options(fn() => app(FieldKitInputRegistry::class)->getOptionsForAdmin())
+                                            ->options(fn () => app(FieldKitInputRegistry::class)->getOptionsForAdmin())
                                             ->required()
                                             ->live()
                                             ->helperText('Select the field type'),
@@ -102,17 +101,17 @@ class FieldDefinitionsRelationManager extends RelationManager
                                             ->numeric()
                                             ->default(function () {
                                                 $maxSort = $this->getOwnerRecord()->fields()->max('sort_order') ?? 1;
+
                                                 return $maxSort + 1;
                                             })
                                             ->helperText('Fields are displayed in ascending order'),
 
-                                         Textarea::make('quick_options')
+                                        Textarea::make('quick_options')
                                             ->label('Options')
                                             ->rows(5)
-                                             ->columnSpanFull()
+                                            ->columnSpanFull()
                                             ->helperText('Enter one option per line. Each will create an option with the label as display and slug as value.')
-                                            ->visible(fn(Get $get, string $operation) => 
-                                                $operation === 'create' && in_array($get('type'), ['select', 'radio'])
+                                            ->visible(fn (Get $get, string $operation) => $operation === 'create' && in_array($get('type'), ['select', 'radio'])
                                             ),
                                     ])
                                     ->columns(2),
@@ -198,11 +197,11 @@ class FieldDefinitionsRelationManager extends RelationManager
                                             ->reorderableWithButtons()
                                             ->collapsible()
                                             ->collapsed(true)
-                                            ->itemLabel(fn(array $state): ?string => $state['label'] ?? $state['value'] ?? null),
+                                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? $state['value'] ?? null),
                                     ])
                                     ->description('Add options for select and radio fields. Users will see the label but the value will be stored.'),
                             ])
-                            ->visible(fn(Get $get) => in_array($get('type'), ['select', 'radio'])),
+                            ->visible(fn (Get $get) => in_array($get('type'), ['select', 'radio'])),
 
                         Tab::make('External Mappings')
                             ->schema([
@@ -376,6 +375,7 @@ class FieldDefinitionsRelationManager extends RelationManager
                         // Store quick_options for later processing but remove from data to save
                         $this->tempQuickOptions = $data['quick_options'] ?? null;
                         unset($data['quick_options']);
+
                         return $data;
                     })
                     ->after(function ($record) {
