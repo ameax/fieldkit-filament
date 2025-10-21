@@ -134,23 +134,25 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
                     // For list operators, explode to array
                     $expectedValues = explode(',', $rawExpectedValues);
                     $expectedValues = array_map('trim', $expectedValues); // Remove whitespace
-                    
+
                     if ($operator === 'in') {
                         return in_array($actualValue, $expectedValues, true);
                     } else {
-                        return !in_array($actualValue, $expectedValues, true);
+                        return ! in_array($actualValue, $expectedValues, true);
                     }
-                    
+
                 case 'equals':
                     // For single value operators, use as string
                     $expectedValue = trim($rawExpectedValues);
+
                     return $actualValue === $expectedValue;
-                    
+
                 case 'not_equals':
                     // For single value operators, use as string
                     $expectedValue = trim($rawExpectedValues);
+
                     return $actualValue !== $expectedValue;
-                    
+
                 default:
                     return false; // Unknown operator
             }
