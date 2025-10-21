@@ -27,24 +27,64 @@ Filament admin panel integration for FieldKit - provides GUI for managing dynami
 
 ## Installation
 
+### Via Composer (when published)
+
 ```bash
 composer require ameax/fieldkit-core
 composer require ameax/fieldkit-filament
 ```
 
-Publish and run migrations:
+### Local Development Setup
+
+For local development, add both packages as path repositories in your main project's `composer.json`:
+
+```json
+{
+    "repositories": [
+        {
+            "type": "path",
+            "url": "packages/fieldkit-core"
+        },
+        {
+            "type": "path",
+            "url": "packages/fieldkit-filament"
+        }
+    ]
+}
+```
+
+Then install:
 
 ```bash
+composer require ameax/fieldkit-core:@dev ameax/fieldkit-filament:@dev
+```
+
+### Register with Filament Panel
+
+Add the plugin to your Filament panel provider (e.g., `app/Providers/Filament/AdminPanelProvider.php` or `app/Providers/Filament/ArashopPanelProvider.php`):
+
+```php
+use Ameax\FieldkitFilament\FieldkitFilamentPlugin;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        // ... other configuration
+        ->plugin(FieldkitFilamentPlugin::make());
+}
+```
+
+### Publish Configuration and Migrations
+
+```bash
+# Publish the configuration files
+php artisan vendor:publish --tag="fieldkit-core-config"
+php artisan vendor:publish --tag="fieldkit-filament-config"
+
+# Publish and run migrations
 php artisan vendor:publish --tag="fieldkit-core-migrations"
 php artisan vendor:publish --tag="fieldkit-filament-migrations"
 php artisan migrate
-```
-
-Publish config (optional):
-
-```bash
-php artisan vendor:publish --tag="fieldkit-core-config"
-php artisan vendor:publish --tag="fieldkit-filament-config"
 ```
 
 ## Basic Usage
