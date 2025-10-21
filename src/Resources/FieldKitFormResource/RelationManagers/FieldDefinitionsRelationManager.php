@@ -18,6 +18,7 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -108,14 +109,54 @@ class FieldDefinitionsRelationManager extends RelationManager
                             ->schema([
                                 Section::make('Field Options')
                                     ->schema([
-                                        Placeholder::make('options_info')
-                                            ->label('')
-                                            ->content('Options are managed through the Options relation manager below this form.'),
-                                    ]),
+                                        Repeater::make('options')
+                                            ->label('Options')
+                                            ->relationship()
+                                            ->schema([
+                                                TextInput::make('value')
+                                                    ->label('Value')
+                                                    ->required()
+                                                    ->placeholder('yes')
+                                                    ->helperText('The actual value stored when this option is selected'),
+                                                
+                                                TextInput::make('label')
+                                                    ->label('Label')
+                                                    ->required()
+                                                    ->placeholder('Yes')
+                                                    ->helperText('The text shown to users'),
+                                                
+                                                TextInput::make('description')
+                                                    ->label('Description')
+                                                    ->placeholder('Optional description')
+                                                    ->helperText('Additional description text'),
+                                                
+                                                TextInput::make('icon')
+                                                    ->label('Icon')
+                                                    ->placeholder('heroicon-o-check')
+                                                    ->helperText('Optional Heroicon name'),
+                                                
+                                                TextInput::make('external_identifier')
+                                                    ->label('External ID')
+                                                    ->placeholder('ext_123')
+                                                    ->helperText('External system identifier'),
+                                                
+                                                TextInput::make('sort_order')
+                                                    ->label('Sort Order')
+                                                    ->numeric()
+                                                    ->default(1)
+                                                    ->helperText('Display order (lower numbers first)'),
+                                            ])
+                                            ->columns(2)
+                                            ->defaultItems(0)
+                                            ->addActionLabel('Add Option')
+                                            ->reorderableWithButtons()
+                                            ->collapsible()
+                                            ->collapsed(false)
+                                            ->itemLabel(fn (array $state): ?string => $state['label'] ?? $state['value'] ?? null),
+                                    ])
+                                    ->description('Add options for select and radio fields. Users will see the label but the value will be stored.'),
                             ])
-                            ->visible(fn(?object $record) =>
-                                $record && in_array($record->type ?? '', ['select', 'radio'])
-                            ),
+                            ->visible(fn(Get $get) => in_array($get('type'), ['select', 'radio'])),
 
                         Tab::make('External Mappings')
                             ->schema([
