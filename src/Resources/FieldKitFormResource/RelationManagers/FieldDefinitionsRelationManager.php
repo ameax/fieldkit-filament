@@ -262,7 +262,6 @@ class FieldDefinitionsRelationManager extends RelationManager
                                                     ->live(),
 
                                                 TextInput::make('field_key')
-                                                    ->autofocus()
                                                     ->label('Field Key')
                                                     ->required()
                                                     ->helperText('Key of the field this depends on'),
