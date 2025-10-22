@@ -11,7 +11,6 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 
-/** @phpstan-ignore-next-line */
 class FieldKitFilamentAdapter implements FieldKitAdapterInterface
 {
     public function getName(): string
