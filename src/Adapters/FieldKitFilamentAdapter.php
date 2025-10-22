@@ -119,7 +119,11 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
 
             // Dependent field not present
             if ($actualValue === null) {
-                return false;
+                return match ($operator) {
+                    'in', 'equals' => false,
+                    'not equals' => false,
+                    default => true,
+                };
             }
 
             // Value normalization (bool → string)

@@ -116,10 +116,42 @@ class FieldKitDefinitionResource extends Resource
                                             ->label('Required Field')
                                             ->default(false),
 
-                                        TextInput::make('validation_rules')
+                                        TagsInput::make('validation_rules')
                                             ->label('Laravel Validation Rules')
-                                            ->placeholder('max:255|alpha_dash')
-                                            ->helperText('Laravel validation syntax (e.g., max:255|alpha_dash)'),
+                                            ->placeholder('Add validation rules...')
+                                            ->helperText('Type and press Enter. Add parameters like: min:3, max:255, size:10, between:1,10')
+                                            ->separator('|')
+                                            ->suggestions([
+                                                'accepted',
+                                                'active_url',
+                                                'alpha',
+                                                'alpha_dash',
+                                                'alpha_num',
+                                                'array',
+                                                'bail',
+                                                'boolean',
+                                                'confirmed',
+                                                'declined',
+                                                'digits',
+                                                'distinct',
+                                                'email',
+                                                'filled',
+                                                'integer',
+                                                'ip',
+                                                'json',
+                                                'lowercase',
+                                                'nullable',
+                                                'numeric',
+                                                'password',
+                                                'present',
+                                                'prohibited',
+                                                'sometimes',
+                                                'string',
+                                                'timezone',
+                                                'uppercase',
+                                                'url',
+                                                'uuid',
+                                            ]),
 
                                     ])
                                     ->columns(2),
