@@ -27,32 +27,32 @@ class OptionsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Section::make('Option Details')
+                Section::make(__('fieldkit-filament::resources.options_relation_manager.section.option_details'))
                     ->schema([
                         TextInput::make('value')
-                            ->label('Value')
+                            ->label(__('fieldkit-filament::resources.options_relation_manager.fields.value.label'))
                             ->required()
-                            ->helperText('Stored in fieldkit_data'),
+                            ->helperText(__('fieldkit-filament::resources.options_relation_manager.fields.value.helper')),
 
                         TextInput::make('label')
-                            ->label('Label')
+                            ->label(__('fieldkit-filament::resources.options_relation_manager.fields.label.label'))
                             ->required()
-                            ->helperText('Displayed to user'),
+                            ->helperText(__('fieldkit-filament::resources.options_relation_manager.fields.label.helper')),
 
                         Textarea::make('description')
-                            ->label('Description')
+                            ->label(__('fieldkit-filament::resources.options_relation_manager.fields.description.label'))
                             ->rows(2)
-                            ->helperText('Optional - for radio buttons with descriptions'),
+                            ->helperText(__('fieldkit-filament::resources.options_relation_manager.fields.description.helper')),
 
                         TextInput::make('external_identifier')
-                            ->label('External ID')
-                            ->helperText('Optional - ID for external system. Fallback: value'),
+                            ->label(__('fieldkit-filament::resources.options_relation_manager.fields.external_identifier.label'))
+                            ->helperText(__('fieldkit-filament::resources.options_relation_manager.fields.external_identifier.helper')),
 
                         TextInput::make('sort_order')
-                            ->label('Sort Order')
+                            ->label(__('fieldkit-filament::resources.options_relation_manager.fields.sort_order.label'))
                             ->numeric()
                             ->default(0)
-                            ->helperText('Options are displayed in ascending order'),
+                            ->helperText(__('fieldkit-filament::resources.options_relation_manager.fields.sort_order.helper')),
                     ])
                     ->columns(2),
             ]);
@@ -64,27 +64,27 @@ class OptionsRelationManager extends RelationManager
             ->recordTitleAttribute('label')
             ->columns([
                 TextColumn::make('value')
-                    ->label('Value')
+                    ->label(__('fieldkit-filament::resources.options_relation_manager.fields.value.label'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('label')
-                    ->label('Label')
+                    ->label(__('fieldkit-filament::resources.options_relation_manager.fields.label.label'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('description')
-                    ->label('Description')
+                    ->label(__('fieldkit-filament::resources.options_relation_manager.fields.description.label'))
                     ->limit(50)
                     ->toggleable(),
 
                 TextColumn::make('external_identifier')
-                    ->label('External ID')
+                    ->label(__('fieldkit-filament::resources.options_relation_manager.fields.external_identifier.label'))
                     ->toggleable()
-                    ->placeholder('(uses value)'),
+                    ->placeholder(__('fieldkit-filament::resources.options_relation_manager.fields.external_identifier.placeholder')),
 
                 TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('fieldkit-filament::resources.options_relation_manager.fields.sort_order.short_label'))
                     ->sortable()
                     ->alignCenter(),
             ])

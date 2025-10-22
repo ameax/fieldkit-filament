@@ -85,6 +85,9 @@ php artisan vendor:publish --tag="fieldkit-filament-config"
 php artisan vendor:publish --tag="fieldkit-core-migrations"
 php artisan vendor:publish --tag="fieldkit-filament-migrations"
 php artisan migrate
+
+# Publish translations (optional)
+php artisan vendor:publish --tag="fieldkit-filament-lang"
 ```
 
 ## Basic Usage

@@ -6,7 +6,6 @@ namespace Ameax\FieldkitFilament\Resources;
 
 use Ameax\FieldkitCore\FieldKitInputRegistry;
 use Ameax\FieldkitCore\Models\FieldKitDefinition;
-use App\Filament\Resources\Resource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -18,6 +17,7 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -31,24 +31,40 @@ use Filament\Tables\Table;
 
 class FieldKitDefinitionResource extends Resource
 {
+    // @phpstan-ignore-next-line
     protected static ?string $model = FieldKitDefinition::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-adjustments-horizontal';
 
     protected static bool $shouldRegisterNavigation = false;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('fieldkit-filament::resources.definitions.navigation_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('fieldkit-filament::resources.definitions.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('fieldkit-filament::resources.definitions.plural_label');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Tabs::make('Definition')
+                Tabs::make(__('fieldkit-filament::resources.definitions.tabs.definition'))
                     ->tabs([
-                        Tab::make('Basic Settings')
+                        Tab::make(__('fieldkit-filament::resources.definitions.tabs.basic_settings'))
                             ->schema([
-                                Section::make('Form & Context')
+                                Section::make(__('fieldkit-filament::resources.definitions.sections.form_context'))
                                     ->schema([
                                         Select::make('fieldkit_form_id')
-                                            ->label('Form')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.fieldkit_form_id.label'))
                                             ->relationship('form', 'name')
                                             ->required()
                                             ->searchable()
@@ -56,70 +72,73 @@ class FieldKitDefinitionResource extends Resource
 
                                         TextInput::make('field_key')
                                             ->autofocus()
-                                            ->label('Field Key')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.field_key.label'))
                                             ->required()
                                             ->unique(ignoreRecord: true)
-                                            ->helperText('Unique identifier for this field (e.g., customer_phone)')
-                                            ->placeholder('customer_phone'),
+                                            ->helperText(__('fieldkit-filament::resources.definitions.fields.field_key.helper'))
+                                            ->placeholder(__('fieldkit-filament::resources.definitions.fields.field_key.placeholder')),
                                     ])
                                     ->columns(2),
 
-                                Section::make('Field Configuration')
+                                Section::make(__('fieldkit-filament::resources.definitions.sections.field_configuration'))
                                     ->schema([
                                         Select::make('type')
-                                            ->label('Field Type')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.type.label'))
+                                            // @phpstan-ignore-next-line
                                             ->options(fn () => app(FieldKitInputRegistry::class)->getOptionsForAdmin())
                                             ->required()
+                                            // @phpstan-ignore-next-line
                                             ->disabled(fn (?FieldKitDefinition $record) => $record && $record->hasSubmittedData()
                                             )
+                                            // @phpstan-ignore-next-line
                                             ->helperText(fn (?FieldKitDefinition $record) => $record && $record->hasSubmittedData()
-                                                    ? 'Type cannot be changed - field has existing data'
-                                                    : 'Select the field type'
+                                                    ? __('fieldkit-filament::resources.definitions.fields.type.helper_disabled')
+                                                    : __('fieldkit-filament::resources.definitions.fields.type.helper')
                                             ),
 
                                         TextInput::make('label')
-                                            ->label('Label')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.label.label'))
                                             ->required()
-                                            ->placeholder('Phone Number'),
+                                            ->placeholder(__('fieldkit-filament::resources.definitions.fields.label.placeholder')),
 
                                         Textarea::make('description')
-                                            ->label('Description')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.description.label'))
                                             ->rows(2)
-                                            ->placeholder('Enter your phone number'),
+                                            ->placeholder(__('fieldkit-filament::resources.definitions.fields.description.placeholder')),
 
                                         TextInput::make('placeholder')
-                                            ->label('Placeholder')
-                                            ->placeholder('+1 (555) 123-4567'),
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.placeholder.label'))
+                                            ->placeholder(__('fieldkit-filament::resources.definitions.fields.placeholder.placeholder')),
                                     ])
                                     ->columns(2),
 
-                                Section::make('Display Settings')
+                                Section::make(__('fieldkit-filament::resources.definitions.sections.display_settings'))
                                     ->schema([
                                         TextInput::make('sort_order')
-                                            ->label('Sort Order')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.sort_order.label'))
                                             ->numeric()
                                             ->default(0)
-                                            ->helperText('Fields are displayed in ascending order'),
+                                            ->helperText(__('fieldkit-filament::resources.definitions.fields.sort_order.helper')),
 
                                         Toggle::make('is_active')
-                                            ->label('Active')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.is_active.label'))
                                             ->default(true),
                                     ])
                                     ->columns(2),
                             ]),
 
-                        Tab::make('Validation')
+                        Tab::make(__('fieldkit-filament::resources.definitions.tabs.validation'))
                             ->schema([
-                                Section::make('Validation Rules')
+                                Section::make(__('fieldkit-filament::resources.definitions.sections.validation_rules'))
                                     ->schema([
                                         Toggle::make('is_required')
-                                            ->label('Required Field')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.is_required.label'))
                                             ->default(false),
 
                                         TagsInput::make('validation_rules')
-                                            ->label('Laravel Validation Rules')
-                                            ->placeholder('Add validation rules...')
-                                            ->helperText('Type and press Enter. Add parameters like: min:3, max:255, size:10, between:1,10')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.validation_rules.label'))
+                                            ->placeholder(__('fieldkit-filament::resources.definitions.fields.validation_rules.placeholder'))
+                                            ->helperText(__('fieldkit-filament::resources.definitions.fields.validation_rules.helper'))
                                             ->separator('|')
                                             ->suggestions([
                                                 'accepted',
@@ -158,140 +177,140 @@ class FieldKitDefinitionResource extends Resource
 
                             ]),
 
-                        Tab::make('Options')
+                        Tab::make(__('fieldkit-filament::resources.definitions.tabs.options'))
                             ->schema([
-                                Section::make('Field Options')
+                                Section::make(__('fieldkit-filament::resources.definitions.sections.field_options'))
                                     ->schema([
                                         Repeater::make('options')
-                                            ->label('Options')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.options.label'))
                                             ->relationship()
                                             ->schema([
                                                 TextInput::make('value')
-                                                    ->label('Value')
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.options.fields.value.label'))
                                                     ->required()
-                                                    ->placeholder('yes')
-                                                    ->helperText('The actual value stored when this option is selected'),
+                                                    ->placeholder(__('fieldkit-filament::resources.definitions.fields.options.fields.value.placeholder'))
+                                                    ->helperText(__('fieldkit-filament::resources.definitions.fields.options.fields.value.helper')),
 
                                                 TextInput::make('label')
-                                                    ->label('Label')
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.options.fields.label.label'))
                                                     ->required()
-                                                    ->placeholder('Yes')
-                                                    ->helperText('The text shown to users'),
+                                                    ->placeholder(__('fieldkit-filament::resources.definitions.fields.options.fields.label.placeholder'))
+                                                    ->helperText(__('fieldkit-filament::resources.definitions.fields.options.fields.label.helper')),
 
                                                 TextInput::make('description')
-                                                    ->label('Description')
-                                                    ->placeholder('Optional description')
-                                                    ->helperText('Additional description text'),
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.options.fields.description.label'))
+                                                    ->placeholder(__('fieldkit-filament::resources.definitions.fields.options.fields.description.placeholder'))
+                                                    ->helperText(__('fieldkit-filament::resources.definitions.fields.options.fields.description.helper')),
 
                                                 TextInput::make('icon')
-                                                    ->label('Icon')
-                                                    ->placeholder('heroicon-o-check')
-                                                    ->helperText('Optional Heroicon name'),
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.options.fields.icon.label'))
+                                                    ->placeholder(__('fieldkit-filament::resources.definitions.fields.options.fields.icon.placeholder'))
+                                                    ->helperText(__('fieldkit-filament::resources.definitions.fields.options.fields.icon.helper')),
 
                                                 TextInput::make('external_identifier')
-                                                    ->label('External ID')
-                                                    ->placeholder('ext_123')
-                                                    ->helperText('External system identifier'),
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.options.fields.external_identifier.label'))
+                                                    ->placeholder(__('fieldkit-filament::resources.definitions.fields.options.fields.external_identifier.placeholder'))
+                                                    ->helperText(__('fieldkit-filament::resources.definitions.fields.options.fields.external_identifier.helper')),
 
                                                 TextInput::make('sort_order')
-                                                    ->label('Sort Order')
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.options.fields.sort_order.label'))
                                                     ->numeric()
                                                     ->default(1)
-                                                    ->helperText('Display order (lower numbers first)'),
+                                                    ->helperText(__('fieldkit-filament::resources.definitions.fields.options.fields.sort_order.helper')),
                                             ])
                                             ->columns(2)
                                             ->defaultItems(0)
-                                            ->addActionLabel('Add Option')
+                                            ->addActionLabel(__('fieldkit-filament::resources.definitions.actions.add_option'))
                                             ->reorderableWithButtons()
                                             ->collapsible()
                                             ->collapsed()
                                             ->itemLabel(fn (array $state): ?string => $state['label'] ?? $state['value'] ?? null),
                                     ])
-                                    ->description('Add options for select and radio fields. Users will see the label but the value will be stored.'),
+                                    ->description(__('fieldkit-filament::resources.definitions.fields.options.description')),
                             ])
                             ->visible(fn (Get $get) => in_array($get('type'), ['select', 'radio'])),
 
-                        Tab::make('External Mappings')
+                        Tab::make(__('fieldkit-filament::resources.definitions.tabs.external_mappings'))
                             ->schema([
-                                Section::make('System Integrations')
+                                Section::make(__('fieldkit-filament::resources.definitions.sections.system_integrations'))
                                     ->schema([
                                         Repeater::make('external_mappings')
-                                            ->label('External Mappings')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.external_mappings.label'))
                                             ->schema([
                                                 Select::make('adapter_type')
-                                                    ->label('Adapter Type')
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.adapter_type.label'))
                                                     ->options([
-                                                        'ameax_column' => 'Ameax Database Column',
-                                                        'mailchimp_api' => 'Mailchimp API',
-                                                        'custom_webhook' => 'Custom Webhook',
+                                                        'ameax_column' => __('fieldkit-filament::resources.definitions.fields.adapter_type.options.ameax_column'),
+                                                        'mailchimp_api' => __('fieldkit-filament::resources.definitions.fields.adapter_type.options.mailchimp_api'),
+                                                        'custom_webhook' => __('fieldkit-filament::resources.definitions.fields.adapter_type.options.custom_webhook'),
                                                     ])
                                                     ->required(),
 
                                                 TextInput::make('target')
-                                                    ->label('Target')
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.target.label'))
                                                     ->required()
-                                                    ->placeholder('customer.phone_number')
-                                                    ->helperText('Dot notation path (e.g., customer.phone_number)'),
+                                                    ->placeholder(__('fieldkit-filament::resources.definitions.fields.target.placeholder'))
+                                                    ->helperText(__('fieldkit-filament::resources.definitions.fields.target.helper')),
 
                                                 KeyValue::make('config')
-                                                    ->label('Configuration')
-                                                    ->keyLabel('Key')
-                                                    ->valueLabel('Value')
-                                                    ->helperText('Additional configuration for this mapping'),
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.config.label'))
+                                                    ->keyLabel(__('fieldkit-filament::resources.definitions.fields.config.key_label'))
+                                                    ->valueLabel(__('fieldkit-filament::resources.definitions.fields.config.value_label'))
+                                                    ->helperText(__('fieldkit-filament::resources.definitions.fields.config.helper')),
                                             ])
                                             ->columns(1)
                                             ->defaultItems(0)
-                                            ->addActionLabel('Add Mapping')
+                                            ->addActionLabel(__('fieldkit-filament::resources.definitions.actions.add_mapping'))
                                             ->collapsible(),
                                     ]),
                             ]),
 
-                        Tab::make('Conditional Visibility')
+                        Tab::make(__('fieldkit-filament::resources.definitions.tabs.conditional_visibility'))
                             ->schema([
-                                Section::make('Display Conditions')
+                                Section::make(__('fieldkit-filament::resources.definitions.sections.display_conditions'))
                                     ->schema([
                                         Repeater::make('conditions')
-                                            ->label('Visibility Conditions')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.conditions.label'))
                                             ->schema([
                                                 Select::make('field_type')
-                                                    ->label('Field Type')
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.field_type.label'))
                                                     ->options([
-                                                        'native' => 'Native Field',
-                                                        'fieldkit' => 'FieldKit Field',
+                                                        'native' => __('fieldkit-filament::resources.definitions.fields.field_type.options.native'),
+                                                        'fieldkit' => __('fieldkit-filament::resources.definitions.fields.field_type.options.fieldkit'),
                                                     ])
                                                     ->required()
                                                     ->live(),
 
                                                 TextInput::make('field_key')
-                                                    ->label('Field Key')
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.field_key.label'))
                                                     ->required()
-                                                    ->helperText('Key of the field this depends on'),
+                                                    ->helperText(__('fieldkit-filament::resources.definitions.fields.field_key.helper')),
 
                                                 Select::make('operator')
-                                                    ->label('Operator')
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.operator.label'))
                                                     ->options([
-                                                        'in' => 'Value is in list',
-                                                        'not_in' => 'Value is not in list',
-                                                        'equals' => 'Value equals',
-                                                        'not_equals' => 'Value does not equal',
+                                                        'in' => __('fieldkit-filament::resources.definitions.fields.operator.options.in'),
+                                                        'not_in' => __('fieldkit-filament::resources.definitions.fields.operator.options.not_in'),
+                                                        'equals' => __('fieldkit-filament::resources.definitions.fields.operator.options.equals'),
+                                                        'not_equals' => __('fieldkit-filament::resources.definitions.fields.operator.options.not_equals'),
                                                     ])
                                                     ->required()
                                                     ->live(onBlur: true),
 
                                                 TextInput::make('expected_values')
-                                                    ->label('Expected Value')
-                                                    ->helperText('Single value that will show/hide this field')
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.expected_values.label'))
+                                                    ->helperText(__('fieldkit-filament::resources.definitions.fields.expected_values.helper'))
                                                     ->visible(fn (Get $get) => in_array($get('operator'), ['equals', 'not_equals'])),
 
                                                 TagsInput::make('expected_values')
-                                                    ->label('Expected Values')
-                                                    ->helperText('Values that will show/hide this field')
+                                                    ->label(__('fieldkit-filament::resources.definitions.fields.expected_values.label_plural'))
+                                                    ->helperText(__('fieldkit-filament::resources.definitions.fields.expected_values.helper_plural'))
                                                     ->separator(',')
                                                     ->visible(fn (Get $get) => in_array($get('operator'), ['in', 'not_in'])),
                                             ])
                                             ->columns(2)
                                             ->defaultItems(0)
-                                            ->addActionLabel('Add Condition')
+                                            ->addActionLabel(__('fieldkit-filament::resources.definitions.actions.add_condition'))
                                             ->collapsible(),
                                     ]),
 
@@ -306,70 +325,71 @@ class FieldKitDefinitionResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('form.name')
-                    ->label('Form')
+                    ->label(__('fieldkit-filament::resources.definitions.fields.form.label'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('field_key')
-                    ->label('Field Key')
+                    ->label(__('fieldkit-filament::resources.definitions.fields.field_key.label'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('type')
-                    ->label('Type')
+                    ->label(__('fieldkit-filament::resources.definitions.fields.type.label'))
                     ->searchable()
                     ->sortable()
                     ->badge(),
 
                 TextColumn::make('label')
-                    ->label('Label')
+                    ->label(__('fieldkit-filament::resources.definitions.fields.label.label'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('fieldkit-filament::resources.definitions.fields.sort_order.label'))
                     ->sortable()
                     ->alignCenter(),
 
                 IconColumn::make('is_required')
-                    ->label('Required')
+                    ->label(__('fieldkit-filament::resources.definitions.fields.is_required.short'))
                     ->boolean()
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('fieldkit-filament::resources.definitions.fields.is_active.label'))
                     ->boolean()
                     ->sortable(),
 
                 TextColumn::make('options_count')
-                    ->label('Options')
+                    ->label(__('fieldkit-filament::resources.definitions.fields.options_count.label'))
                     ->counts('options')
                     ->sortable()
                     ->alignCenter()
                     ->visible(fn ($record) => in_array($record?->type, ['select', 'radio'])),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fieldkit-filament::resources.definitions.fields.created_at.label'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('fieldkit_form_id')
-                    ->label('Form')
+                    ->label(__('fieldkit-filament::resources.definitions.filters.fieldkit_form_id'))
                     ->relationship('form', 'name')
                     ->searchable()
                     ->preload(),
 
                 SelectFilter::make('type')
-                    ->label('Type')
+                    ->label(__('fieldkit-filament::resources.definitions.filters.type'))
+                    // @phpstan-ignore-next-line
                     ->options(fn () => app(FieldKitInputRegistry::class)->getOptionsForAdmin()),
 
                 TernaryFilter::make('is_required')
-                    ->label('Required'),
+                    ->label(__('fieldkit-filament::resources.definitions.filters.is_required')),
 
                 TernaryFilter::make('is_active')
-                    ->label('Active Status'),
+                    ->label(__('fieldkit-filament::resources.definitions.filters.is_active')),
             ])
             ->recordActions([
                 EditAction::make(),

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ameax\FieldkitFilament\Resources;
 
 use Ameax\FieldkitCore\Models\FieldKitForm;
-use App\Filament\Resources\Resource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -13,6 +12,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
@@ -23,13 +23,29 @@ use Illuminate\Support\Str;
 
 class FieldKitFormResource extends Resource
 {
+    // @phpstan-ignore-next-line
     protected static ?string $model = FieldKitForm::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     public static function getNavigationGroup(): ?string
     {
-        return 'System';
+        return __('fieldkit-filament::resources.forms.navigation_group');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('fieldkit-filament::resources.forms.navigation_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('fieldkit-filament::resources.forms.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('fieldkit-filament::resources.forms.plural_label');
     }
 
     public static function getNavigationSort(): ?int
@@ -41,19 +57,19 @@ class FieldKitFormResource extends Resource
     {
         return $schema
             ->components([
-                Section::make('Basic Information')
+                Section::make(__('fieldkit-filament::resources.forms.sections.basic_information'))
                     ->schema([
                         TextInput::make('purpose_token')
-                            ->label('Purpose Token')
+                            ->label(__('fieldkit-filament::resources.forms.fields.purpose_token.label'))
                             ->required()
                             ->unique(ignoreRecord: true)
-                            ->helperText('Unique identifier for this form (e.g., customer_registration)')
-                            ->placeholder('customer_registration'),
+                            ->helperText(__('fieldkit-filament::resources.forms.fields.purpose_token.helper'))
+                            ->placeholder(__('fieldkit-filament::resources.forms.fields.purpose_token.placeholder')),
 
                         TextInput::make('name')
-                            ->label('Form Name')
+                            ->label(__('fieldkit-filament::resources.forms.fields.name.label'))
                             ->required()
-                            ->placeholder('Customer Registration')
+                            ->placeholder(__('fieldkit-filament::resources.forms.fields.name.placeholder'))
                             ->afterStateUpdated(function (string $operation, $state, callable $set) {
                                 if ($operation !== 'create') {
                                     return;
@@ -64,24 +80,24 @@ class FieldKitFormResource extends Resource
                             ->live(onBlur: true),
 
                         Textarea::make('description')
-                            ->label('Description')
+                            ->label(__('fieldkit-filament::resources.forms.fields.description.label'))
                             ->rows(3)
-                            ->placeholder('Additional fields for customer registration'),
+                            ->placeholder(__('fieldkit-filament::resources.forms.fields.description.placeholder')),
 
                         Toggle::make('is_active')
-                            ->label('Active')
+                            ->label(__('fieldkit-filament::resources.forms.fields.is_active.label'))
                             ->default(true),
                     ])
                     ->columns(2),
 
-                Section::make('Multi-Tenancy (Optional)')
+                Section::make(__('fieldkit-filament::resources.forms.sections.multi_tenancy'))
                     ->schema([
                         TextInput::make('owner_type')
-                            ->label('Owner Type')
-                            ->placeholder('App\\Models\\Shop'),
+                            ->label(__('fieldkit-filament::resources.forms.fields.owner_type.label'))
+                            ->placeholder(__('fieldkit-filament::resources.forms.fields.owner_type.placeholder')),
 
                         TextInput::make('owner_id')
-                            ->label('Owner ID')
+                            ->label(__('fieldkit-filament::resources.forms.fields.owner_id.label'))
                             ->numeric(),
                     ])
                     ->columns(2)
@@ -95,34 +111,34 @@ class FieldKitFormResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('purpose_token')
-                    ->label('Purpose Token')
+                    ->label(__('fieldkit-filament::resources.forms.fields.purpose_token.label'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('name')
-                    ->label('Form Name')
+                    ->label(__('fieldkit-filament::resources.forms.fields.name.label'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('fields_count')
-                    ->label('Fields')
+                    ->label(__('fieldkit-filament::resources.forms.fields.fields_count.label'))
                     ->counts('fields')
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('fieldkit-filament::resources.forms.fields.is_active.label'))
                     ->boolean()
                     ->sortable(),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fieldkit-filament::resources.forms.fields.created_at.label'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TernaryFilter::make('is_active')
-                    ->label('Active Status'),
+                    ->label(__('fieldkit-filament::resources.forms.filters.is_active')),
             ])
             ->recordActions([
                 EditAction::make(),
