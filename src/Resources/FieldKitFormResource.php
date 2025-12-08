@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ameax\FieldkitFilament\Resources;
 
+use Ameax\FieldkitCore\Contracts\ContextProviderInterface;
 use Ameax\FieldkitCore\Models\FieldKitForm;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -90,19 +91,7 @@ class FieldKitFormResource extends Resource
                     ])
                     ->columns(2),
 
-                Section::make(__('fieldkit-filament::resources.forms.sections.multi_tenancy'))
-                    ->schema([
-                        TextInput::make('owner_type')
-                            ->label(__('fieldkit-filament::resources.forms.fields.owner_type.label'))
-                            ->placeholder(__('fieldkit-filament::resources.forms.fields.owner_type.placeholder')),
-
-                        TextInput::make('owner_id')
-                            ->label(__('fieldkit-filament::resources.forms.fields.owner_id.label'))
-                            ->numeric(),
-                    ])
-                    ->columns(2)
-                    ->collapsible()
-                    ->collapsed(),
+                ...static::getContextSection(),
             ]);
     }
 
@@ -129,6 +118,8 @@ class FieldKitFormResource extends Resource
                     ->label(__('fieldkit-filament::resources.forms.fields.is_active.label'))
                     ->boolean()
                     ->sortable(),
+
+                ...static::getContextTableColumns(),
 
                 TextColumn::make('created_at')
                     ->label(__('fieldkit-filament::resources.forms.fields.created_at.label'))
@@ -166,5 +157,78 @@ class FieldKitFormResource extends Resource
             'create' => \Ameax\FieldkitFilament\Resources\FieldKitFormResource\Pages\CreateFieldKitForm::route('/create'),
             'edit' => \Ameax\FieldkitFilament\Resources\FieldKitFormResource\Pages\EditFieldKitForm::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * Get context section for the form
+     *
+     * @return array<Section>
+     */
+    protected static function getContextSection(): array
+    {
+        $provider = static::getContextProvider();
+
+        if (! $provider) {
+            // No context provider configured - show legacy multi-tenancy fields
+            return [
+                Section::make(__('fieldkit-filament::resources.forms.sections.multi_tenancy'))
+                    ->schema([
+                        TextInput::make('owner_type')
+                            ->label(__('fieldkit-filament::resources.forms.fields.owner_type.label'))
+                            ->placeholder(__('fieldkit-filament::resources.forms.fields.owner_type.placeholder')),
+
+                        TextInput::make('owner_id')
+                            ->label(__('fieldkit-filament::resources.forms.fields.owner_id.label'))
+                            ->numeric(),
+                    ])
+                    ->columns(2)
+                    ->collapsible()
+                    ->collapsed(),
+            ];
+        }
+
+        $fields = $provider->getFormFields();
+        if (empty($fields)) {
+            return [];
+        }
+
+        return [
+            Section::make($provider->getSectionLabel())
+                ->description($provider->getSectionDescription())
+                ->schema($fields)
+                ->columns(2)
+                ->collapsible(),
+        ];
+    }
+
+    /**
+     * Get context columns for the table
+     *
+     * @return array<mixed>
+     */
+    protected static function getContextTableColumns(): array
+    {
+        $provider = static::getContextProvider();
+
+        if (! $provider) {
+            return [];
+        }
+
+        return $provider->getTableColumns();
+    }
+
+    protected static function getContextProvider(): ?ContextProviderInterface
+    {
+        if (! config('fieldkit.context.enabled', false)) {
+            return null;
+        }
+
+        $providerClass = config('fieldkit.context.provider');
+
+        if (! $providerClass || ! class_exists($providerClass)) {
+            return null;
+        }
+
+        return app($providerClass);
     }
 }
