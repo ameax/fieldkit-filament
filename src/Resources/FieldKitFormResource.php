@@ -10,6 +10,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -60,19 +61,15 @@ class FieldKitFormResource extends Resource
             ->components([
                 Section::make(__('fieldkit-filament::resources.forms.sections.basic_information'))
                     ->schema([
-                        TextInput::make('purpose_token')
-                            ->label(__('fieldkit-filament::resources.forms.fields.purpose_token.label'))
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->helperText(__('fieldkit-filament::resources.forms.fields.purpose_token.helper'))
-                            ->placeholder(__('fieldkit-filament::resources.forms.fields.purpose_token.placeholder')),
+                        static::getPurposeTokenField(),
 
                         TextInput::make('name')
                             ->label(__('fieldkit-filament::resources.forms.fields.name.label'))
                             ->required()
                             ->placeholder(__('fieldkit-filament::resources.forms.fields.name.placeholder'))
                             ->afterStateUpdated(function (string $operation, $state, callable $set) {
-                                if ($operation !== 'create') {
+                                // Only auto-fill purpose_token if using TextInput (no predefined tokens)
+                                if ($operation !== 'create' || ! empty(config('fieldkit.purpose_tokens', []))) {
                                     return;
                                 }
 
@@ -157,6 +154,43 @@ class FieldKitFormResource extends Resource
             'create' => \Ameax\FieldkitFilament\Resources\FieldKitFormResource\Pages\CreateFieldKitForm::route('/create'),
             'edit' => \Ameax\FieldkitFilament\Resources\FieldKitFormResource\Pages\EditFieldKitForm::route('/{record}/edit'),
         ];
+    }
+
+    /**
+     * Get the purpose token field - Select if tokens configured, TextInput otherwise
+     */
+    protected static function getPurposeTokenField(): Select|TextInput
+    {
+        $purposeTokens = config('fieldkit.purpose_tokens', []);
+
+        // If purpose tokens are configured, use Select dropdown
+        if (! empty($purposeTokens)) {
+            return Select::make('purpose_token')
+                ->label(__('fieldkit-filament::resources.forms.fields.purpose_token.label'))
+                ->required()
+                ->options(function (?FieldKitForm $record) use ($purposeTokens): array {
+                    $usedTokens = FieldKitForm::query()
+                        ->when($record, fn ($q) => $q->where('id', '!=', $record->id))
+                        ->pluck('purpose_token')
+                        ->toArray();
+
+                    return array_filter(
+                        $purposeTokens,
+                        fn ($label, $token) => ! in_array($token, $usedTokens),
+                        ARRAY_FILTER_USE_BOTH
+                    );
+                })
+                ->helperText(__('fieldkit-filament::resources.forms.fields.purpose_token.helper'))
+                ->searchable();
+        }
+
+        // Otherwise, use TextInput (original behavior)
+        return TextInput::make('purpose_token')
+            ->label(__('fieldkit-filament::resources.forms.fields.purpose_token.label'))
+            ->required()
+            ->unique(ignoreRecord: true)
+            ->helperText(__('fieldkit-filament::resources.forms.fields.purpose_token.helper'))
+            ->placeholder(__('fieldkit-filament::resources.forms.fields.purpose_token.placeholder'));
     }
 
     /**
