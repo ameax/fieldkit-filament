@@ -264,12 +264,21 @@ class FieldKitFormResource extends Resource
         }
 
         // Use form_provider for form-level context, fallback to provider for backwards compatibility
-        $providerClass = config('fieldkit.context.form_provider') ?? config('fieldkit.context.provider');
+        $providerConfig = config('fieldkit.context.form_provider') ?? config('fieldkit.context.provider');
 
-        if (! $providerClass || ! class_exists($providerClass)) {
+        if (! $providerConfig) {
             return null;
         }
 
-        return app($providerClass);
+        // Handle closure (factory method) or class string
+        if ($providerConfig instanceof \Closure) {
+            return $providerConfig();
+        }
+
+        if (is_string($providerConfig) && class_exists($providerConfig)) {
+            return app($providerConfig);
+        }
+
+        return null;
     }
 }

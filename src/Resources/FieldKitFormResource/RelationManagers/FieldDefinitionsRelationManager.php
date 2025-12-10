@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ameax\FieldkitFilament\Resources\FieldKitFormResource\RelationManagers;
 
-use Ameax\FieldkitCore\Contracts\ContextProviderInterface;
 use Ameax\FieldkitCore\FieldKitInputRegistry;
 use Ameax\FieldkitFilament\Helpers\ArrayHelper;
 use Filament\Actions\BulkActionGroup;
@@ -358,14 +357,21 @@ class FieldDefinitionsRelationManager extends RelationManager
         }
 
         // Use field_provider for field-level context, fallback to provider for backwards compatibility
-        $providerClass = config('fieldkit.context.field_provider') ?? config('fieldkit.context.provider');
+        $providerConfig = config('fieldkit.context.field_provider') ?? config('fieldkit.context.provider');
 
-        if (! $providerClass || ! class_exists($providerClass)) {
+        if (! $providerConfig) {
             return [];
         }
 
-        /** @var ContextProviderInterface $provider */
-        $provider = app($providerClass);
+        // Handle closure (factory method) or class string
+        if ($providerConfig instanceof \Closure) {
+            $provider = $providerConfig();
+        } elseif (is_string($providerConfig) && class_exists($providerConfig)) {
+            $provider = app($providerConfig);
+        } else {
+            return [];
+        }
+
         $fields = $provider->getFormFields();
 
         if (empty($fields)) {
