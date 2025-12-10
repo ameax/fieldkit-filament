@@ -79,6 +79,7 @@ return [
             'field_options' => 'Field Options',
             'system_integrations' => 'System Integrations',
             'display_conditions' => 'Display Conditions',
+            'visibility' => 'Visibility',
             'field_visibility_description' => 'Leave empty to inherit visibility from the parent form',
         ],
 

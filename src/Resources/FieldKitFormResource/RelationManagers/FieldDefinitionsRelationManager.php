@@ -141,6 +141,8 @@ class FieldDefinitionsRelationManager extends RelationManager
                                             ->default(true),
                                     ])
                                     ->columns(2),
+
+                                ...static::getContextSection(),
                             ]),
 
                         Tab::make(__('fieldkit-filament::resources.definitions.tabs.validation'))
@@ -337,19 +339,17 @@ class FieldDefinitionsRelationManager extends RelationManager
                                     ]),
 
                             ]),
-
-                        ...static::getContextTab(),
                     ])
                     ->columnSpanFull(),
             ]);
     }
 
     /**
-     * Get context tab for field-level visibility
+     * Get context section for field-level visibility (in Basic Settings tab)
      *
-     * @return array<Tab>
+     * @return array<Section>
      */
-    protected static function getContextTab(): array
+    protected static function getContextSection(): array
     {
         if (! config('fieldkit.context.enabled', false)) {
             return [];
@@ -369,15 +369,13 @@ class FieldDefinitionsRelationManager extends RelationManager
             return [];
         }
 
-        // Remap field names from context_data.* to context_data.* (same structure as form)
         return [
-            Tab::make(__('fieldkit-filament::resources.definitions.tabs.visibility'))
-                ->schema([
-                    Section::make($provider->getSectionLabel())
-                        ->description(__('fieldkit-filament::resources.definitions.sections.field_visibility_description'))
-                        ->schema($fields)
-                        ->columns(2),
-                ]),
+            Section::make(__('fieldkit-filament::resources.definitions.sections.visibility'))
+                ->description(__('fieldkit-filament::resources.definitions.sections.field_visibility_description'))
+                ->schema($fields)
+                ->columns(2)
+                ->collapsible()
+                ->collapsed(),
         ];
     }
 

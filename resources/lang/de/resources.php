@@ -79,6 +79,7 @@ return [
             'field_options' => 'Feldoptionen',
             'system_integrations' => 'Systemintegrationen',
             'display_conditions' => 'Anzeigebedingungen',
+            'visibility' => 'Sichtbarkeit',
             'field_visibility_description' => 'Leer lassen, um die Sichtbarkeit vom übergeordneten Formular zu übernehmen',
         ],
 
