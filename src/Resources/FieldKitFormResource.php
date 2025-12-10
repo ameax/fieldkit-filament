@@ -85,6 +85,14 @@ class FieldKitFormResource extends Resource
                         Toggle::make('is_active')
                             ->label(__('fieldkit-filament::resources.forms.fields.is_active.label'))
                             ->default(true),
+
+                        TextInput::make('priority')
+                            ->label(__('fieldkit-filament::resources.forms.fields.priority.label'))
+                            ->numeric()
+                            ->default(10)
+                            ->minValue(1)
+                            ->maxValue(255)
+                            ->helperText(__('fieldkit-filament::resources.forms.fields.priority.helper')),
                     ])
                     ->columns(2),
 
@@ -116,6 +124,16 @@ class FieldKitFormResource extends Resource
                     ->boolean()
                     ->sortable(),
 
+                TextColumn::make('priority')
+                    ->label(__('fieldkit-filament::resources.forms.fields.priority.label'))
+                    ->sortable()
+                    ->badge()
+                    ->color(fn (int $state): string => match (true) {
+                        $state <= 3 => 'success',
+                        $state <= 7 => 'warning',
+                        default => 'gray',
+                    }),
+
                 ...static::getContextTableColumns(),
 
                 TextColumn::make('created_at')
@@ -137,7 +155,7 @@ class FieldKitFormResource extends Resource
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('priority', 'asc');
     }
 
     public static function getRelations(): array
@@ -168,18 +186,7 @@ class FieldKitFormResource extends Resource
             return Select::make('purpose_token')
                 ->label(__('fieldkit-filament::resources.forms.fields.purpose_token.label'))
                 ->required()
-                ->options(function (?FieldKitForm $record) use ($purposeTokens): array {
-                    $usedTokens = FieldKitForm::query()
-                        ->when($record, fn ($q) => $q->where('id', '!=', $record->id))
-                        ->pluck('purpose_token')
-                        ->toArray();
-
-                    return array_filter(
-                        $purposeTokens,
-                        fn ($label, $token) => ! in_array($token, $usedTokens),
-                        ARRAY_FILTER_USE_BOTH
-                    );
-                })
+                ->options($purposeTokens)
                 ->helperText(__('fieldkit-filament::resources.forms.fields.purpose_token.helper'))
                 ->searchable();
         }
@@ -188,7 +195,6 @@ class FieldKitFormResource extends Resource
         return TextInput::make('purpose_token')
             ->label(__('fieldkit-filament::resources.forms.fields.purpose_token.label'))
             ->required()
-            ->unique(ignoreRecord: true)
             ->helperText(__('fieldkit-filament::resources.forms.fields.purpose_token.helper'))
             ->placeholder(__('fieldkit-filament::resources.forms.fields.purpose_token.placeholder'));
     }

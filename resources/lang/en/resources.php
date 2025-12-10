@@ -26,6 +26,10 @@ return [
             'is_active' => [
                 'label' => 'Active',
             ],
+            'priority' => [
+                'label' => 'Priority',
+                'helper' => 'Lower number = higher priority (1 is highest)',
+            ],
             'owner_type' => [
                 'label' => 'Owner Type',
                 'placeholder' => 'App\\Models\\Shop',
@@ -64,6 +68,7 @@ return [
             'options' => 'Options',
             'external_mappings' => 'External Mappings',
             'conditional_visibility' => 'Conditional Visibility',
+            'visibility' => 'Visibility',
         ],
 
         'sections' => [
@@ -74,6 +79,7 @@ return [
             'field_options' => 'Field Options',
             'system_integrations' => 'System Integrations',
             'display_conditions' => 'Display Conditions',
+            'field_visibility_description' => 'Leave empty to inherit visibility from the parent form',
         ],
 
         'fields' => [

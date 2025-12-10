@@ -26,6 +26,10 @@ return [
             'is_active' => [
                 'label' => 'Aktiv',
             ],
+            'priority' => [
+                'label' => 'Priorität',
+                'helper' => 'Niedrigere Zahl = höhere Priorität (1 ist höchste)',
+            ],
             'owner_type' => [
                 'label' => 'Besitzertyp',
                 'placeholder' => 'App\\Models\\Shop',
@@ -64,6 +68,7 @@ return [
             'options' => 'Optionen',
             'external_mappings' => 'Externe Zuordnungen',
             'conditional_visibility' => 'Bedingte Sichtbarkeit',
+            'visibility' => 'Sichtbarkeit',
         ],
 
         'sections' => [
@@ -74,6 +79,7 @@ return [
             'field_options' => 'Feldoptionen',
             'system_integrations' => 'Systemintegrationen',
             'display_conditions' => 'Anzeigebedingungen',
+            'field_visibility_description' => 'Leer lassen, um die Sichtbarkeit vom übergeordneten Formular zu übernehmen',
         ],
 
         'fields' => [

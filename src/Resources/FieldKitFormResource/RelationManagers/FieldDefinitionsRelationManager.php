@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ameax\FieldkitFilament\Resources\FieldKitFormResource\RelationManagers;
 
+use Ameax\FieldkitCore\Contracts\ContextProviderInterface;
 use Ameax\FieldkitCore\FieldKitInputRegistry;
 use Ameax\FieldkitFilament\Helpers\ArrayHelper;
 use Filament\Actions\BulkActionGroup;
@@ -336,9 +337,48 @@ class FieldDefinitionsRelationManager extends RelationManager
                                     ]),
 
                             ]),
+
+                        ...static::getContextTab(),
                     ])
                     ->columnSpanFull(),
             ]);
+    }
+
+    /**
+     * Get context tab for field-level visibility
+     *
+     * @return array<Tab>
+     */
+    protected static function getContextTab(): array
+    {
+        if (! config('fieldkit.context.enabled', false)) {
+            return [];
+        }
+
+        $providerClass = config('fieldkit.context.provider');
+
+        if (! $providerClass || ! class_exists($providerClass)) {
+            return [];
+        }
+
+        /** @var ContextProviderInterface $provider */
+        $provider = app($providerClass);
+        $fields = $provider->getFormFields();
+
+        if (empty($fields)) {
+            return [];
+        }
+
+        // Remap field names from context_data.* to context_data.* (same structure as form)
+        return [
+            Tab::make(__('fieldkit-filament::resources.definitions.tabs.visibility'))
+                ->schema([
+                    Section::make($provider->getSectionLabel())
+                        ->description(__('fieldkit-filament::resources.definitions.sections.field_visibility_description'))
+                        ->schema($fields)
+                        ->columns(2),
+                ]),
+        ];
     }
 
     public function table(Table $table): Table
