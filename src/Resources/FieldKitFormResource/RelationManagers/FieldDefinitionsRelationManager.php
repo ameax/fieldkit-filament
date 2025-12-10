@@ -347,6 +347,8 @@ class FieldDefinitionsRelationManager extends RelationManager
     /**
      * Get context section for field-level visibility (in Basic Settings tab)
      *
+     * Uses field_provider for granular shop-level filtering (separate from form-level shop groups)
+     *
      * @return array<Section>
      */
     protected static function getContextSection(): array
@@ -355,7 +357,8 @@ class FieldDefinitionsRelationManager extends RelationManager
             return [];
         }
 
-        $providerClass = config('fieldkit.context.provider');
+        // Use field_provider for field-level context, fallback to provider for backwards compatibility
+        $providerClass = config('fieldkit.context.field_provider') ?? config('fieldkit.context.provider');
 
         if (! $providerClass || ! class_exists($providerClass)) {
             return [];
