@@ -144,6 +144,10 @@ return [
                 'placeholder' => 'Add validation rules...',
                 'helper' => 'Type and press Enter. Add parameters like: min:3, max:255, size:10, between:1,10',
             ],
+            'validation_pattern' => [
+                'label' => 'Validation Pattern',
+                'placeholder' => 'Select pattern...',
+            ],
             'options' => [
                 'label' => 'Options',
                 'quick_label' => 'Options',

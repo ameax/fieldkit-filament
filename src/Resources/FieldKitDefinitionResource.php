@@ -135,6 +135,11 @@ class FieldKitDefinitionResource extends Resource
                                             ->label(__('fieldkit-filament::resources.definitions.fields.is_required.label'))
                                             ->default(false),
 
+                                        Select::make('validation_pattern')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.validation_pattern.label'))
+                                            ->placeholder(__('fieldkit-filament::resources.definitions.fields.validation_pattern.placeholder'))
+                                            ->options(\Ameax\FieldkitCore\Enums\ValidationPatternEnum::options()),
+
                                         TagsInput::make('validation_rules')
                                             ->label(__('fieldkit-filament::resources.definitions.fields.validation_rules.label'))
                                             ->placeholder(__('fieldkit-filament::resources.definitions.fields.validation_rules.placeholder'))

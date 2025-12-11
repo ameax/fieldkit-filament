@@ -55,6 +55,14 @@ class FieldKitFilamentAdapter implements FieldKitAdapterInterface
                 ->label($label)
                 ->required($required);
 
+            // Apply validation rules if provided
+            if (! empty($config['validation'])) {
+                $rules = is_array($config['validation'])
+                    ? $config['validation']
+                    : [$config['validation']];
+                $component->rules($rules);
+            }
+
             // Make field live() if it's referenced as a dependency in other fields' conditions
             if ($this->isFieldDependency($name, $config)) {
                 $component->live(onBlur: true);

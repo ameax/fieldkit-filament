@@ -144,6 +144,10 @@ return [
                 'placeholder' => 'Validierungsregeln hinzufügen...',
                 'helper' => 'Eingeben und Enter drücken. Parameter hinzufügen wie: min:3, max:255, size:10, between:1,10',
             ],
+            'validation_pattern' => [
+                'label' => 'Validierungsmuster',
+                'placeholder' => 'Muster auswählen...',
+            ],
             'options' => [
                 'label' => 'Optionen',
                 'quick_label' => 'Optionen',
