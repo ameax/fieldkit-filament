@@ -92,7 +92,6 @@ class FieldDefinitionsRelationManager extends RelationManager
 
                                         Select::make('type')
                                             ->label(__('fieldkit-filament::resources.definitions.fields.type.label'))
-                                            // @phpstan-ignore-next-line
                                             ->options(fn () => app(FieldKitInputRegistry::class)->getOptionsForAdmin())
                                             ->required()
                                             ->live()
@@ -140,6 +139,8 @@ class FieldDefinitionsRelationManager extends RelationManager
                                             ->default(true),
                                     ])
                                     ->columns(2),
+
+                                ...static::getContextSection(),
                             ]),
 
                         Tab::make(__('fieldkit-filament::resources.definitions.tabs.validation'))
@@ -149,6 +150,11 @@ class FieldDefinitionsRelationManager extends RelationManager
                                         Toggle::make('is_required')
                                             ->label(__('fieldkit-filament::resources.definitions.fields.is_required.label'))
                                             ->default(false),
+
+                                        Select::make('validation_pattern')
+                                            ->label(__('fieldkit-filament::resources.definitions.fields.validation_pattern.label'))
+                                            ->placeholder(__('fieldkit-filament::resources.definitions.fields.validation_pattern.placeholder'))
+                                            ->options(\Ameax\FieldkitCore\Enums\ValidationPatternEnum::options()),
 
                                         TagsInput::make('validation_rules')
                                             ->label(__('fieldkit-filament::resources.definitions.fields.validation_rules.label'))
@@ -339,6 +345,51 @@ class FieldDefinitionsRelationManager extends RelationManager
                     ])
                     ->columnSpanFull(),
             ]);
+    }
+
+    /**
+     * Get context section for field-level visibility (in Basic Settings tab)
+     *
+     * Uses field_provider for granular shop-level filtering (separate from form-level shop groups)
+     *
+     * @return array<Section>
+     */
+    protected static function getContextSection(): array
+    {
+        if (! config('fieldkit.context.enabled', false)) {
+            return [];
+        }
+
+        // Use field_provider for field-level context, fallback to provider for backwards compatibility
+        $providerConfig = config('fieldkit.context.field_provider') ?? config('fieldkit.context.provider');
+
+        if (! $providerConfig) {
+            return [];
+        }
+
+        // Handle closure (factory method) or class string
+        if ($providerConfig instanceof \Closure) {
+            $provider = $providerConfig();
+        } elseif (is_string($providerConfig) && class_exists($providerConfig)) {
+            $provider = app($providerConfig);
+        } else {
+            return [];
+        }
+
+        $fields = $provider->getFormFields();
+
+        if (empty($fields)) {
+            return [];
+        }
+
+        return [
+            Section::make(__('fieldkit-filament::resources.definitions.sections.visibility'))
+                ->description(__('fieldkit-filament::resources.definitions.sections.field_visibility_description'))
+                ->schema($fields)
+                ->columns(2)
+                ->collapsible()
+                ->collapsed(),
+        ];
     }
 
     public function table(Table $table): Table

@@ -1,6 +1,12 @@
 {
     "name": "ameax/fieldkit-filament",
     "description": "Filament admin panel integration for FieldKit - provides GUI for managing dynamic form fields and renders Filament form components",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/ameax/fieldkit-core"
+        }
+    ],
     "keywords": [
         "ameax",
         "laravel",
@@ -21,6 +27,7 @@
     ],
     "require": {
         "php": "^8.3",
+        "ameax/fieldkit-core": "*@dev",
         "filament/filament": "^4.1",
         "illuminate/contracts": "^11.0||^12.0",
         "spatie/laravel-package-tools": "^1.16"
