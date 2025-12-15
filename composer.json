@@ -3,8 +3,8 @@
     "description": "Filament admin panel integration for FieldKit - provides GUI for managing dynamic form fields and renders Filament form components",
     "repositories": [
         {
-            "type": "path",
-            "url": "../fieldkit-core"
+            "type": "vcs",
+            "url": "https://github.com/ameax/fieldkit-core"
         }
     ],
     "keywords": [
