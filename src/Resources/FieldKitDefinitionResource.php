@@ -31,7 +31,6 @@ use Filament\Tables\Table;
 
 class FieldKitDefinitionResource extends Resource
 {
-    // @phpstan-ignore-next-line
     protected static ?string $model = FieldKitDefinition::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-adjustments-horizontal';
@@ -84,13 +83,11 @@ class FieldKitDefinitionResource extends Resource
                                     ->schema([
                                         Select::make('type')
                                             ->label(__('fieldkit-filament::resources.definitions.fields.type.label'))
-                                            // @phpstan-ignore-next-line
                                             ->options(fn () => app(FieldKitInputRegistry::class)->getOptionsForAdmin())
                                             ->required()
-                                            // @phpstan-ignore-next-line
-                                            ->disabled(fn (?FieldKitDefinition $record) => $record && $record->hasSubmittedData()
-                                            )
-                                            // @phpstan-ignore-next-line
+                                            /** @phpstan-ignore-next-line method.notFound */
+                                            ->disabled(fn (?FieldKitDefinition $record) => $record && $record->hasSubmittedData())
+                                            /** @phpstan-ignore-next-line method.notFound */
                                             ->helperText(fn (?FieldKitDefinition $record) => $record && $record->hasSubmittedData()
                                                     ? __('fieldkit-filament::resources.definitions.fields.type.helper_disabled')
                                                     : __('fieldkit-filament::resources.definitions.fields.type.helper')
@@ -387,7 +384,6 @@ class FieldKitDefinitionResource extends Resource
 
                 SelectFilter::make('type')
                     ->label(__('fieldkit-filament::resources.definitions.filters.type'))
-                    // @phpstan-ignore-next-line
                     ->options(fn () => app(FieldKitInputRegistry::class)->getOptionsForAdmin()),
 
                 TernaryFilter::make('is_required')

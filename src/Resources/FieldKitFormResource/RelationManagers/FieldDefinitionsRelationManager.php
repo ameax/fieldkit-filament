@@ -92,7 +92,6 @@ class FieldDefinitionsRelationManager extends RelationManager
 
                                         Select::make('type')
                                             ->label(__('fieldkit-filament::resources.definitions.fields.type.label'))
-                                            // @phpstan-ignore-next-line
                                             ->options(fn () => app(FieldKitInputRegistry::class)->getOptionsForAdmin())
                                             ->required()
                                             ->live()

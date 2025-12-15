@@ -25,7 +25,6 @@ use Illuminate\Support\Str;
 
 class FieldKitFormResource extends Resource
 {
-    // @phpstan-ignore-next-line
     protected static ?string $model = FieldKitForm::class;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
