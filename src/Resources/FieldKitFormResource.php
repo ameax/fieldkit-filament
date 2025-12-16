@@ -269,11 +269,17 @@ class FieldKitFormResource extends Resource
             return null;
         }
 
-        // Handle closure (factory method) or class string
+        // Handle closure (factory method)
         if ($providerConfig instanceof \Closure) {
             return $providerConfig();
         }
 
+        // Handle callable array [ClassName::class, 'methodName'] for config:cache compatibility
+        if (is_array($providerConfig) && is_callable($providerConfig)) {
+            return call_user_func($providerConfig);
+        }
+
+        // Handle class string (instantiate via container)
         if (is_string($providerConfig) && class_exists($providerConfig)) {
             return app($providerConfig);
         }
