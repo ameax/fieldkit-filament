@@ -370,10 +370,10 @@ class FieldDefinitionsRelationManager extends RelationManager
         // Handle closure (factory method)
         if ($providerConfig instanceof \Closure) {
             $provider = $providerConfig();
-        // Handle callable array [ClassName::class, 'methodName'] for config:cache compatibility
+            // Handle callable array [ClassName::class, 'methodName'] for config:cache compatibility
         } elseif (is_array($providerConfig) && is_callable($providerConfig)) {
             $provider = call_user_func($providerConfig);
-        // Handle class string (instantiate via container)
+            // Handle class string (instantiate via container)
         } elseif (is_string($providerConfig) && class_exists($providerConfig)) {
             $provider = app($providerConfig);
         } else {
