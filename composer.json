@@ -29,7 +29,7 @@
         "php": "^8.3",
         "ameax/fieldkit-core": "*@dev",
         "filament/filament": "^4.1||^5.0",
-        "illuminate/contracts": "^11.0||^12.0",
+        "illuminate/contracts": "^11.0||^12.0||^13.0",
         "spatie/laravel-package-tools": "^1.16"
     },
     "require-dev": {
